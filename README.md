@@ -1,17 +1,19 @@
 # RADAS
 
-Hasta contar con mejores nombres (.py implícito):
+##Hasta contar con mejores nombres (.py implícito):
 
-test_marco1_m -> main
-func_aux_main -> definiciones auxiliares para main
+__test_marco1_m__ -> main
 
-funciones_data -> Script para recibir y formatear datos del equipo DAS
+__func_aux_main__ -> definiciones auxiliares para main
 
-funciones_grafico -> Script para mostrar waterfall (y otros) localmente
+__funciones_data__ -> Script para recibir y formatear datos del equipo DAS
 
-func_alarmas -> Script para calcular alarmas con z_scores
-funciones_alarmas-> definiciones auxiliares usadas por func_alarmas
+__funciones_grafico__ -> Script para mostrar waterfall (y otros) localmente
 
-funciones_bokeh -> SCript para publicar waterfall web
+__func_alarmas__ -> Script para calcular alarmas con z_scores
 
-func_opc -> Script para servidor OPC
+__funciones_alarmas__ -> definiciones auxiliares usadas por func_alarmas
+
+__funciones_bokeh__ -> SCript para publicar waterfall web
+
+__func_opc__ -> Script para servidor OPC
