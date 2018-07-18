@@ -34,25 +34,25 @@ def z_binning_vect(data,window,win_cant):
 	return binned_matrix.mean(0)
 
 def ts_to_stringDate(ts):
-    res=""
-    for num in map(str,ts[0:3]):
-        if len(num)==1:
-            res+="0"
-        res+=num+"/"
-    res=res[:-1]
-    res+=" "
-    for num in map(str,ts[3:]):
-        if len(num)==1:
-            res+="0"
-        res+=num+":"
-    return res[:-1]
+	res=""
+	for num in map(str,ts[0:3]):
+		if len(num)==1:
+			res+="0"
+		res+=num+"/"
+	res=res[:-1]
+	res+=" "
+	for num in map(str,ts[3:]):
+		if len(num)==1:
+			res+="0"
+		res+=num+":"
+	return res[:-1]
 
 def funcion_documento(doc):
 	source = ColumnDataSource(data=dict(img=[],y=[]))
 
 	bin_inicio=1680
 	bin_fin=5180
-	bines=493
+	bines=200
 	lineas_vista=60
 	vmin=0.01
 	vmax=0.2
@@ -94,21 +94,23 @@ def funcion_documento(doc):
 		p.title.text=ts_to_stringDate(last_ts)
 
 	def worker():
-		block_size=10
+		block_size=50
 		myQ=collections.deque()
-		qLock.acquire()
 		bokeh_queues[int(time.time()*1000000)]=myQ
-		qLock.release()
 		t=0
-		while True:
+		end_th=False
+		while not(end_th):
 			if(len(myQ)>block_size):
 				block_vect,last_ts=get_block_q(block_size,myQ)
 				data_update=z_binning_vect(np.mean(block_vect,axis=0)[bin_inicio:bin_fin],(bin_fin-bin_inicio)/bines,bines)
 				doc.add_next_tick_callback(partial(update_img, img=data_update.reshape(1,bines),t=t,v_min=color_scale['vmin'],v_max=color_scale['vmax'],last_ts=last_ts)) # simula un nuevo trigger del callback
 				t=t-1
+				try:
+					doc.session_context.id
+				except:
+					end_th=True
 			else:
 				time.sleep(1)
-		print "termina th: "
 	blk=threading.Thread(target=worker)	
 	blk.start()
 
@@ -119,13 +121,34 @@ server = Server({'/': funcion_documento},allow_websocket_origin=["*"])
 server.start()
 
 def run_server():
-    print('Empieza web')
-    server.io_loop.add_callback(server.show, "/")
-    server.io_loop.start()
+	print('Empieza web')
+	server.io_loop.add_callback(server.show, "/")
+	server.io_loop.start()
+
+def queue_Monitor():
+	sizes={}
+	grow_limit=120#cantidad de iteraciones donde la queue no fue consumida
+	print "Monitoreando queues"
+	while True:
+		#print [s.id for s in server.get_sessions()]
+		time.sleep(1)
+		claves=bokeh_queues.keys()#para que no se rompa si se modifica crea en el medio
+		for key in claves:
+			if key in sizes:
+				tam=len(bokeh_queues[key])
+				if 0 < tam >=sizes[key][0]:
+					sizes[key]=(tam,sizes[key][1]+1)
+				else:
+					sizes[key]=(tam,0)#reinicio si se consumio algo de la q
+			else:
+				sizes[key]=(len(bokeh_queues[key]),0)
+			if sizes[key][1]==grow_limit:
+				bokeh_queues.pop(key,None)
+				print "Id bokeh session ended: ",key
 
 if __name__ == '__main__':
-    lalal=threading.Thread(target=run_server)
-    lalal.start()
-    asd=np.random.uniform(0,1,size=100)
-    plt.plot(asd)
-    plt.show()
+	lalal=threading.Thread(target=run_server)
+	lalal.start()
+	asd=np.random.uniform(0,1,size=100)
+	plt.plot(asd)
+	plt.show()

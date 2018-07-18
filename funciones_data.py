@@ -7,6 +7,22 @@ try:
 except:
     print "No estamos en windows, no hay pipes de win32"
 
+
+def ts_to_stringDate(ts):
+    res=""
+    for num in map(str,ts[0:3]):
+        if len(num)==1:
+            res+="0"
+        res+=num+"/"
+    res=res[:-1]
+    res+=" "
+    for num in map(str,ts[3:]):
+        if len(num)==1:
+            res+="0"
+        res+=num+":"
+    return res[:-1]
+
+
 def ts_now():
     now=(datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")).split('-')
     res=map(int,now)
@@ -47,7 +63,7 @@ def data_generation(pipe_handler,vec_size,ts_size,source_DAS,time_stamp_DAS,boke
             if bokeh_switch:
                 for q in qbokeh.keys():
                     qbokeh[q].append(new_data)
-                print "queues bokeh activas: ", len(qbokeh.keys())
+                #print "queues bokeh activas: ", len(qbokeh.keys())
         except e:
             print e
             pass

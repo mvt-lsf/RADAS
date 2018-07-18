@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import threading,datetime
+import threading,datetime,sys
 try:
     import win32file
 except:

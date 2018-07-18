@@ -28,7 +28,7 @@ def mail_alerta(body):
         print "Falla mail"
 
 def reportar(alarmas,ts,logfile=None,mail_alert=False):
-    texto_reporte=ts+"-> Hay alarma en las zonas : "
+    texto_reporte=ts+"-> zonas : "
     for zona in alarmas:
         texto_reporte+=str(zona)+' '
     texto_reporte+='\n'
@@ -36,6 +36,7 @@ def reportar(alarmas,ts,logfile=None,mail_alert=False):
     if logfile:
         logfile.write(texto_reporte)
     if mail_alert:
+        print "mail enviado"
         mail_alerta(texto_reporte)
 
 
@@ -62,31 +63,34 @@ def alarmas_queue(bins,ventana_alarma,zonas,umbrales,ancho_zona,filename_base,bi
         print 'No hay ', filename_base
         live_base=True
 
-    now=datetime.datetime.now().strftime("%Y-%M-%d__%H_%M_%S")
+    now=datetime.datetime.now().strftime("%Y-%m-%d__%H_%M_%S")
     logfile=open(now+'.alarms','a')
 
     window_count=0
     bloque_inicial=np.array([])
 
     while(window_count<ventana_alarma):
-        try:
+        try:#con un if len positiva tal vez basta
             fila_nueva,ts=alarm_queue.popleft()
             window_count+=1   
         except:#Si no hay elementos en la cola
-            #print e
-            print "Llenando bloque inicial de alarma..."
             time.sleep(plots_per_second*0.8)#0.8 para tardar un poco menos que lo tarda en aparecer un nuevo elemento
             continue
         fila_nueva=fila_nueva[bin_inicio:bin_fin]
         fila_zoneada=z_binning_vect(fila_nueva[:ancho_zona*zonas],ancho_zona)
         bloque_inicial=np.append(bloque_inicial,fila_zoneada)
     bloque_inicial=bloque_inicial.reshape(-1,zonas)
+    print "Bloque inicial lleno. Comienza a detectar"
+
     if live_base:
         mean_base,std_base=np.mean(bloque_inicial,axis=0),np.std(bloque_inicial,axis=0)
     u_m,u_c,_=encontrar_alarmas_live(bloque_inicial,mean_base,std_base,umbrales,ventana_alarma,zonas)
 
     timer_alarm_seg=60
     timer_alarm=time.time()
+    
+    timer_mail_ok_seg=60*60*4
+    timer_mail_ok=time.time()
 
     zonas_report=np.array([])
 
@@ -104,11 +108,18 @@ def alarmas_queue(bins,ventana_alarma,zonas,umbrales,ancho_zona,filename_base,bi
             #DECISION POLEMICA-alarmas obliga que alguien consuma report_queue (OPC sv por ej)
 
         ahora=time.time()
+       
         if (ahora-timer_alarm)>timer_alarm_seg:#reporta cuando se cumple timer_mail que regula tambien cuando escribe el log :S
+            timer_alarm=time.time()
             if zonas_report.size>0:
                 reportar(np.unique(zonas_report),ts_to_stringDate(ts),logfile,mail_send)
                 zonas_report=np.array([])
-                timer_alarm=time.time()
+                timer_mail_ok=time.time()
+       
+        if(ahora-timer_mail_ok)>timer_mail_ok_seg:
+            timer_mail_ok=time.time()
+            mail_alerta("No hubo alarma en las ultimas 4 horas")
+            
         zonas_report=np.append(zonas_report,np.unique(np.where(alarmas>0)[0]/factor_zoneo))
             #actualizar_histograma(alarmas,ts)
-        print 'alarmas pendientes: ', len(alarm_queue), 'zonas alarmas: ',zonas_report.size
+        #print 'alarmas pendientes: ', len(alarm_queue), 'zonas alarmas: ',zonas_report.size
