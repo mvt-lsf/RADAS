@@ -1,6 +1,6 @@
 # RADAS
 
-##Hasta contar con mejores nombres (.py implícito):
+## Hasta contar con mejores nombres (.py implícito):
 
 __test_marco1_m__ -> main
 
