@@ -2,8 +2,33 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+def nombre_avg_2(archivo):
+    return archivo[:-3]+'avg'
+
+def nombre_avg(archivo,same=False):
+    if same:
+        return nombre_avg_2(archivo)
+    return '../AVG/'+archivo[:-3]+'avg'
 
 
+def cargar_base_larga(archivos_std,bins,bin_inicio=0,bin_fin=None,norm=True,ancho_zona=4):
+    imagen_std_actual=cargar_archivo(archivos_std[0],bins,bin_inicio,bin_fin,norm,same=True)#cargo el primero
+    filas=imagen_std_actual.shape[0]    
+    dato_z=zonear(imagen_std_actual,None,ancho_zona,filas)#asume multiplo de ancho_Zona por eso none    
+    media_z=np.mean(dato_z,axis=0)
+    varianza_z=np.var(dato_z,axis=0,ddof=1)    
+    for archivo in archivos_std[1:]:#cargo los restantes
+        dato_z=zonear(cargar_archivo(archivo,bins,bin_inicio,bin_fin,norm,same=True),None,ancho_zona,filas)        
+        media_z+=np.mean(dato_z,axis=0)
+        varianza_z+=np.var(dato_z,axis=0,ddof=1)    
+    return media_z/(len(archivos_std)),np.sqrt(varianza_z)/np.sqrt(len(archivos_std))
+
+def cargar_archivo(archivo,bins,bin_inicio,bin_fin,norm,same=False):
+    if norm:
+        wat=np.reshape(np.fromfile(archivo,dtype=np.float32),(-1,bins))[:,bin_inicio:bin_fin]/np.reshape(np.fromfile(nombre_avg(archivo,same),dtype=np.float32),(-1,bins))[:,bin_inicio:bin_fin]
+        return wat
+    else:
+        return np.reshape(np.fromfile(archivo,dtype=np.float32),(-1,bins))[:,bin_inicio:bin_fin]
 def z_binning_vect(data,window):
 	if data.shape[0]%window==0:
 		ultimo_bin=None
@@ -15,14 +40,6 @@ def z_binning_vect(data,window):
 
 def zonear(data,ultima_multiplo,ancho_zona,filas):
 	return np.array([z_binning_vect(data[i,:ultima_multiplo],ancho_zona)for i in range (filas)])
-
-def cargar_archivo(archivo,bins,bin_inicio,bin_fin,norm):
-    if norm:
-        return np.reshape(np.fromfile(archivo,dtype=np.float32),(-1,bins))[:,bin_inicio:bin_fin]/np.reshape(np.fromfile((archivo[:-3]+'avg'),dtype=np.float32),(-1,bins))[:,bin_inicio:bin_fin] 
-    else:
-        return np.reshape(np.fromfile(archivo,dtype=np.float32),(-1,bins))[:,bin_inicio:bin_fin] 
-
-
 
 def cargar_linea_de_base(filename_base,bins,bin_inicio,bin_fin,ancho_zona,zonas,base_inicio=0,base_fin=None,norm=True):
 	linea_de_base=cargar_archivo(filename_base,bins,bin_inicio,bin_fin,norm)[base_inicio:base_fin,:]

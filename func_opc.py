@@ -27,14 +27,29 @@ def server_opc(zonas_cant,qAlarmas,OPC_alert):
         new_zone=myobj.add_variable(idx, "Zona_"+str(i+1), False)
         new_zone.set_writable()
         zonass.append(new_zone)
+
+    zonass_silence=[]
+    for i in range(zonas_cant):
+        new_zone=myobj.add_variable(idx, "Silenciar_zona_"+str(i+1), False)
+        new_zone.set_writable()
+        zonass_silence.append(new_zone)
+
+
     
     estados=[]
     for i in range(5):
-        new_st=myobj.add_variable(idx, "Estado_"+str(i+1), False)
+#        new_st=myobj.add_variable(idx, "Estado_"+str(i+1), int(0))
+        new_st=myobj.add_variable(idx, "Estado_"+str(i+1), float(0))
         new_st.set_writable()
         estados.append(new_st)
+        
+    new_st=myobj.add_variable(idx, "Cantidad_de_zonas_activadas", float(0))
+    new_st.set_writable()
+    estados.append(new_st)
+        
     
     zonass=np.array(zonass)#DUDOSO USO DE np
+    zonass_silence=np.array(zonass_silence)
     
     variable_mail=myobj.add_variable(idx,"Notificar_mail",True)
     variable_mail.set_writable()
@@ -43,8 +58,9 @@ def server_opc(zonas_cant,qAlarmas,OPC_alert):
     server.start()
     try:
         while True:
-            if len(qAlarmas)>0:
+            if qAlarmas!={} and len(qAlarmas)>0:#VER MODIFICACION
                 proxima_alarma=qAlarmas.popleft()
+                print proxima_alarma
                 #print proxima_alarma
                 if OPC_alert:
                     for zona in zonass[proxima_alarma]:

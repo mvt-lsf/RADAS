@@ -8,6 +8,7 @@ import matplotlib.animation as animation
 from matplotlib.widgets import Button,Slider
 import time,datetime,os
 import re
+import json
 
 def ts_to_stringDate(ts):
     res=""
@@ -52,16 +53,39 @@ def parse_markers(archivo_punzados):
     return res
 
 block_size=5 #DECISION POLEMICA--global para animation y switch
+old_block_size=block_size
 tInicial=time.time()
 slider_switch=False
 plot_marks=[]
+
+new_txt=0     
+path_web='\\\Sscrdcrapl04\\Y-TEC\\WF\\web\\'
+web_update_timer=time.time()
+web_update_seg=15
+
+folder_creation_timer=time.time()
+folder_creation_limit_seg=60*60*24
+
+path_Guardado='\\\Sscrdcrapl04\\Y-TEC\\WF\\'
+
+def new_folder_date(path):
+    fecha=datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+    res=path+fecha+'\\'
+    try:
+        os.mkdir(res)
+    except:
+        print "error creacion de carpeta", res
+    return res
+
+
+
 def plot_setup(save_figure,data_queue,bins_plot,delta_x,plots_per_second):
-    global plot_marks
+    global plot_marks,img_dst
     block_size_original=block_size
     if save_figure:
-        segundosEsperaCap=160
-        path_Guardado='F:/figurasWF/'+datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")+'/'
-        os.mkdir(path_Guardado)
+        segundosEsperaCap=100
+        img_dst=new_folder_date(path_Guardado)
+
 
     fig,ax=plt.subplots(figsize=(20, 10))
     fig.canvas.set_window_title('Waterfall costero')
@@ -84,7 +108,7 @@ def plot_setup(save_figure,data_queue,bins_plot,delta_x,plots_per_second):
 
     for label,position in markers.iteritems():
         mark=ax.axvline(x=position/delta_x,color='lightcoral')
-        t=ax.text(position/delta_x,rows_plot/2,label,rotation=90,color='hotpink',weight='bold')
+        t=ax.text(position/delta_x,rows_plot/2,label,rotation=90,color='hotpink',weight='bold',fontsize=12)
         plot_marks.append(mark)
         plot_marks.append(t)
 
@@ -120,13 +144,14 @@ def plot_setup(save_figure,data_queue,bins_plot,delta_x,plots_per_second):
     ax.fmt_ydata=lambda y: str((y-rows_plot)*plots_per_second)[0:5]+'s  STD:'
     fig.tight_layout()
 
-    zoom_inicial_m=3300
-    zoom_final_m=10800
+    zoom_inicial_m=3400
+    zoom_final_m=10300
     ax.set_xlim(zoom_inicial_m/delta_x,zoom_final_m/delta_x)
 
 
     def update_plot(frame):
-        global block_size,tInicial #lo necesita global para cambiarlo
+        global block_size,tInicial,old_block_size,new_txt,folder_creation_timer,web_update_timer,img_dst #lo necesita global para cambiarlo
+        
         if len(data_queue)>=block_size:
             new_block, last_ts=get_block(data_queue,block_size)
             line_prom.set_ydata(np.mean(new_block,axis=0))
@@ -140,16 +165,36 @@ def plot_setup(save_figure,data_queue,bins_plot,delta_x,plots_per_second):
             #print 'Perfiles en espera: ', len(data_queue)
             if len(data_queue)>10*block_size:
                 block_size=min(block_size*2,100)
-                print 'Recalculado block size a ',block_size
             else: 
                 block_size=max(block_size_original,block_size/4)
                 #print 'Recalculado block size a ',block_size
+            if block_size!=old_block_size:
+               # print "Cambia actualizacion waterfall a ", block_size, " filas por vez"
+                old_block_size=block_size
             if save_figure:
                 tActual=time.time()
                 if (tActual-tInicial)>segundosEsperaCap:
                     tInicial=time.time()
                     filename=ts_to_stringDate(last_ts).replace(" ","_").replace(":","_").replace("/","_")
-                    fig.savefig(path_Guardado+filename+'.jpg',dpi=100,transparent=True)
+                    new_img=img_dst
+                    fig.savefig(new_img+filename+'.jpg',dpi=100,transparent=True)
+
+                if(tActual- folder_creation_timer )>folder_creation_limit_seg:
+                    folder_creation_timer=time.time()
+                    img_dst=new_folder_date(path_Guardado)
+
+                if (tActual-web_update_timer)>web_update_seg:
+                    try:
+                        fig.savefig(path_web+'imagen_actual.jpg',dpi=100,transparent=True)
+                        with open(path_web+"lala.json", "r") as jsonFile:
+                            data = json.load(jsonFile)
+                        data["lastfile"] = str(new_txt)
+                        new_txt=(new_txt+1)%9 #que escriba solo un caracter, es para que actualice la imagen   
+                        with open(path_web+"lala.json", "w") as jsonFile:
+                            json.dump(data, jsonFile)
+                        web_update_timer=time.time()
+                    except:
+                        print "Falla imagen web", datetime.datetime.now()
 
 
 
