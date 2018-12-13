@@ -99,6 +99,7 @@ if __name__ == '__main__':
         opc_th=th_launch(func_opc.server_opc,[zonas_opc,qRepAlarm,OPC_alert])
 
 
+    #Lanza el thread de la distribución de datos
     data_arguments=[pipe_handler,bins_plot*dtype_size,ts_size,source_DAS,time_stamp_DAS,bokeh_switch,ts_file,qWF,bins_plot]
     data_th=th_launch(das_data.data_generation,data_arguments,kw={'qZscores':qZscores,'qbokeh':qbokeh})
 
