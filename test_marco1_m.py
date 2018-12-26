@@ -13,7 +13,7 @@ from func_aux_main import *
 
 if __name__ == '__main__':
 
-#---------------Bloque 1---------------
+
     #Setup flags
     bokeh_switch=False
 
@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     alarmas_switch=True
 
-    OPC_switch=True
+    OPC_switch=True 
     OPC_alert=False #regula si se notifica automaticamente la alarma
 
     save_figure=True
@@ -30,36 +30,32 @@ if __name__ == '__main__':
     mail_send=True#regula el envio de mails
 
 
-    #flag para regular envio de mails via opc o timer *not implemented*
+    #flag para regular envio de mails via opc o timer *not implemented* 
 
-#--------------Bloque 2----------------
+
     #Setup values
-
+    
     if source_DAS: #valores que vienen del main para escalar espacialmente datos DAS
         delta_x = delta_x()
         print delta_x, "metros por bin"
     else:
         delta_x=2.02337 #delta_x manual
 
-
+    
     plots_per_second=0.4 #RENOMBRAR/RECALCULAR indica cuanto acumula en tiempo una fila del waterfall
 
-    pipe_handler,bins_plot,dtype_size,ts_size,ts_file=data_gen_parameters(source_DAS,time_stamp_DAS)
-
-#------------Bloque 3-------------------
-
-        #Setup queues
-
-    qWF=collections.deque()
+    #Setup queues
+    
+    buffer_q=collections.deque() 
     qZscores=None#DECISION quasi-POLEMICA, lo necesita data_gen
     if alarmas_switch:
         qZscores=collections.deque()
-    if OPC_alert:
-        qRepAlarm=collections.deque()#DECISION POLEMICA-alarmas obliga que alguien consuma qRepAlarm (OPC sv por ej). acoplar si estan acoplados, desacoplar si no
-    else:
-        qRepAlarm={}
+        if OPC_switch:
+            report_queue=collections.deque()#DECISION POLEMICA-alarmas obliga que alguien consuma report_queue (OPC sv por ej). acoplar si estan acoplados, desacoplar si no
+        else:
+            report_queue={}
     #Thread Launch
-
+    
     qbokeh=None
     if bokeh_switch:
         import funciones_bokeh as bkh
@@ -68,9 +64,8 @@ if __name__ == '__main__':
         monitor_th=th_launch(bkh.queue_Monitor,[])
 
 
-#--------------Bloque 4-----------------------------------
 
-
+    pipe_handler,bins_plot,dtype_size,ts_size,ts_file=data_gen_parameters(source_DAS,time_stamp_DAS)
 
 
     if alarmas_switch:
@@ -78,13 +73,13 @@ if __name__ == '__main__':
         zonas_opc=18
         factor_zoneo=41
         #zonas=zonas_opc*factor_zoneo#confuso rango de las zonas
-
-
+        
+  
         #intervencion silenciar principio. no respeta tamanio para opc
         zonas=680
         bin_inicio=1872
         ancho_zona=4
-        bin_fin=bin_inicio+zonas*ancho_zona # no estamos detectando el tramo aereo
+        bin_fin=bin_inicio+zonas*ancho_zona
 
         umbrales={20:0.9,40:0.85}
         ventana_alarma=150
@@ -92,18 +87,17 @@ if __name__ == '__main__':
         base_fin=None #tal vez innecsario con el mecanismo de base larga
         print "Alarmas con: ", umbrales, "en ", ventana_alarma, " filas de std", 'bin inicio: ',bin_inicio, ' hasta ',bin_fin
 
-        argumentos_alarma=[bins_plot,ventana_alarma,zonas,umbrales,(bin_fin-bin_inicio)/zonas,'base.std',bin_inicio,bin_fin,base_inicio,base_fin,qZscores,qRepAlarm,factor_zoneo,mail_send,delta_x]
+        argumentos_alarma=[bins_plot,ventana_alarma,zonas,umbrales,(bin_fin-bin_inicio)/zonas,'base.std',bin_inicio,bin_fin,base_inicio,base_fin,qZscores,report_queue,factor_zoneo,mail_send,delta_x]
         alarmas_th=th_launch(func_alarmas.alarmas_queue,argumentos_alarma)
 
     if OPC_switch:
-        opc_th=th_launch(func_opc.server_opc,[zonas_opc,qRepAlarm,OPC_alert])
+        opc_th=th_launch(func_opc.server_opc,[zonas_opc,report_queue,OPC_alert])
 
 
-    #Lanza el thread de la distribución de datos
-    data_arguments=[pipe_handler,bins_plot*dtype_size,ts_size,source_DAS,time_stamp_DAS,bokeh_switch,ts_file,qWF,bins_plot]
+    data_arguments=[pipe_handler,bins_plot*dtype_size,ts_size,source_DAS,time_stamp_DAS,bokeh_switch,ts_file,buffer_q,bins_plot]
     data_th=th_launch(das_data.data_generation,data_arguments,kw={'qZscores':qZscores,'qbokeh':qbokeh})
 
-    plot_anim,ref_slider,ref_button=func_plot.plot_setup(save_figure,qWF,bins_plot,delta_x,plots_per_second)
-
+    plot_anim,ref_slider,ref_button=func_plot.plot_setup(save_figure,buffer_q,bins_plot,delta_x,plots_per_second)
+                      
 
     plt.show()
