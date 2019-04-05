@@ -52,7 +52,7 @@ def parse_markers(archivo_punzados):
                 res[mark[0][0]]=float(mark[0][1])
     return res
 
-block_size=5 #DECISION POLEMICA--global para animation y switch
+block_size=20 #DECISION POLEMICA--global para animation y switch
 old_block_size=block_size
 tInicial=time.time()
 slider_switch=False
@@ -169,7 +169,7 @@ def plot_setup(save_figure,data_queue,bins_plot,delta_x,plots_per_second):
                 block_size=max(block_size_original,block_size/4)
                 #print 'Recalculado block size a ',block_size
             if block_size!=old_block_size:
-               # print "Cambia actualizacion waterfall a ", block_size, " filas por vez"
+                print "Cambia actualizacion waterfall a ", block_size, " filas por vez"
                 old_block_size=block_size
             if save_figure:
                 tActual=time.time()

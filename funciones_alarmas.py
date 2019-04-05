@@ -31,6 +31,7 @@ def cargar_archivo(archivo,bins,bin_inicio,bin_fin,norm,same=False):
         return wat
     else:
         return np.reshape(np.fromfile(archivo,dtype=np.float32),(-1,bins))[:,bin_inicio:bin_fin]
+
 def z_binning_vect(data,window):
 	if data.shape[0]%window==0:
 		ultimo_bin=None
@@ -105,7 +106,7 @@ def is_zone_silenced(zone,silence_dict):
 def load_silence_file(fname,silence_dict):
     with open(fname,"r") as f:
         zones,silence_hrs=f.readline().split(" ")#elem 0 =zonas, elem 1=horas a silenciar
-    silence_hrs=min(24,float(silence_hrs))#maximo 24 hrs de silence
+    silence_hrs=min(168,float(silence_hrs))#maximo 1 sem de silence
     if '-' in zones:#caso rango
         rango=zones.split('-')
         start=int(rango[0])
@@ -133,7 +134,7 @@ def zone_watcher(silence_dict,check_freq=30):
             if now>deadline:
                 del silence_dict[zone] #se agoto el deadline
         
-        archivos_a_silenciar=glob.glob("//Sscrdcrapl04/silenciarRA/*.silence")
+        archivos_a_silenciar=glob.glob("//Sscrdcrapl04/Y-TEC/silenciarRA/*.silence")
         if archivos_a_silenciar!=[]:
             for f in archivos_a_silenciar:
                 try:
@@ -236,6 +237,6 @@ def reporte(alarmas,dict_coords,dict_bins,ts,silenciadas):
         texto_reporte+=str(zona)+' '
     texto_reporte+='\n'
     pares_alarma=closest_zone(dict_bins,alarmas)
-    return texto_reporte,texto_zonas_mail(dict_coords,pares_alarma),len(pares_alarma)
+    return texto_reporte,texto_zonas_mail(dict_coords,pares_alarma),len(alarmas)
 
 

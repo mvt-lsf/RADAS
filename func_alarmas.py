@@ -10,12 +10,18 @@ import subprocess as sp
 import cPickle as pickle
 #usa z_binning_vect siempre con multiplos
 
-def alarm_handler(alarmas,report_queue,factor_zoneo,zonas_report,mail_send_ok,dict_coords,dict_bins,ts,logfile,mail_send,data_report,delta_x,plots_per_second,timer_alarm_seg,timer_mail_ok_seg,last_mail,silence_dict,timer_alarm,timer_mail_ok):
+def alarm_handler(alarmas,report_queue,factor_zoneo,zonas_report,mail_send_ok,dict_coords,dict_bins,ts,logfile,mail_send,data_report,delta_x,plots_per_second,timer_alarm_seg,timer_mail_ok_seg,last_mail,silence_dict,timer_alarm,timer_mail_ok,zonas_ultimo_mail,cuenta_mail_ventana,ventana_alarma):
     
     if np.any(np.where(alarmas>0)) and report_queue!={}:
         report_queue.append(np.unique(np.where(alarmas>0)[0]/factor_zoneo))#VERIFICAR con OPC AUTOMATICO porque no estan equiespaciadas entonces no es solo dividir
     
     zonas_report=np.append(zonas_report,np.unique(np.where(alarmas>0)[0]))
+    
+    if cuenta_mail_ventana<ventana_alarma:#espero una ventana para volver a reportar una zona
+        cuenta_mail_ventana+=1
+        zonas_report=np.setdiff1d(zonas_report,zonas_ultimo_mail)
+
+    
     
     ahora=time.time()
    
@@ -39,10 +45,14 @@ def alarm_handler(alarmas,report_queue,factor_zoneo,zonas_report,mail_send_ok,di
                 pickle.dump(kargs_mail,f,pickle.HIGHEST_PROTOCOL)
             sp.Popen(("python report_mail.py "+mail_tmp_file).split(),stderr=None,stdin=None,stdout=None)#se manda mail
         
-        timer_alarm=time.time()
-        timer_mail_ok=time.time()
-        mail_send_ok=False
+            timer_alarm=time.time()
+            timer_mail_ok=time.time()
+            mail_send_ok=False
+            zonas_ultimo_mail=zonas_mail
+            cuenta_mail_ventana=0
+        
         zonas_report=np.array([])
+
     
     
     if not(mail_send_ok) and (ahora-timer_alarm>timer_alarm_seg):
@@ -57,7 +67,7 @@ def alarm_handler(alarmas,report_queue,factor_zoneo,zonas_report,mail_send_ok,di
             with open(mail_tmp_file,'wb') as f:
                 pickle.dump(kargs_mail,f,pickle.HIGHEST_PROTOCOL)
             sp.Popen(("python report_mail.py "+mail_tmp_file).split(),stderr=None,stdin=None,stdout=None)#se manda mail
-    return timer_alarm,timer_mail_ok,zonas_report,mail_send_ok
+    return timer_alarm,timer_mail_ok,zonas_report,mail_send_ok,zonas_ultimo_mail,cuenta_mail_ventana
 
 
 
@@ -66,7 +76,7 @@ def alarmas_queue(bins,ventana_alarma,zonas,umbrales,ancho_zona,filename_base,bi
     try:
         #mean_base,std_base=cargar_linea_de_base(filename_base,bins,bin_inicio,bin_fin,ancho_zona,zonas,base_inicio,base_fin)
         ##BASE LARGA
-        base_larga=glob.glob('C:/test base larga/1_madrugada/STD/0*.std')
+        base_larga=glob.glob('C:/test base larga/24hrs/STD/0*.std')
         base_larga.sort(key=os.path.getmtime)#tal vezno hace falta
         
         mean_base,std_base=cargar_base_larga(base_larga,bins,bin_inicio,bin_fin,ancho_zona=ancho_zona)
@@ -119,7 +129,7 @@ def alarmas_queue(bins,ventana_alarma,zonas,umbrales,ancho_zona,filename_base,bi
     timer_alarm_seg=60*4
     timer_alarm=time.time()
     
-    timer_mail_ok_seg=60*60*4
+    timer_mail_ok_seg=60*60*3
     timer_mail_ok=time.time()
 
     zonas_report=np.array([])
@@ -130,6 +140,9 @@ def alarmas_queue(bins,ventana_alarma,zonas,umbrales,ancho_zona,filename_base,bi
     last_mail={}
     silence_dict={}
     tt=th_launch(zone_watcher,[silence_dict])
+    
+    zonas_ultimo_mail=[]
+    cuenta_mail_ventana=0
 
     while(True):
         if len(alarm_queue)>0: #deberia ser un wait
@@ -142,7 +155,7 @@ def alarmas_queue(bins,ventana_alarma,zonas,umbrales,ancho_zona,filename_base,bi
             fila_zoneada=z_binning_vect(fila_nueva[:ancho_zona*zonas],ancho_zona)
             alarmas= alarma_fila_nueva(fila_zoneada,umbrales,mean_base,std_base,u_m,u_c,ventana_alarma,zonas)
     
-            timer_alarm,timer_mail_ok,zonas_report,mail_send_ok=alarm_handler(alarmas,report_queue,factor_zoneo,zonas_report,mail_send_ok,dict_coords,dict_bins,ts,logfile,mail_send,data_report,delta_x,plots_per_second,timer_alarm_seg,timer_mail_ok_seg,last_mail,silence_dict,timer_alarm,timer_mail_ok)
+            timer_alarm,timer_mail_ok,zonas_report,mail_send_ok,zonas_ultimo_mail,cuenta_mail_ventana=alarm_handler(alarmas,report_queue,factor_zoneo,zonas_report,mail_send_ok,dict_coords,dict_bins,ts,logfile,mail_send,data_report,delta_x,plots_per_second,timer_alarm_seg,timer_mail_ok_seg,last_mail,silence_dict,timer_alarm,timer_mail_ok,zonas_ultimo_mail,cuenta_mail_ventana,ventana_alarma)
 
             if len(alarm_queue)>max_pendiente:#deberia haber un monitor global de queues y no estar aca xq confunde
                 max_pendiente=len(alarm_queue)

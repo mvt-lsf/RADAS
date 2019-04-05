@@ -17,7 +17,7 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.mime.image import MIMEImage
 
-
+import datetime
 
 def valores_copados(vec,factor_de_copadez=50.0):
     return factor_de_copadez*(np.floor(vec/factor_de_copadez) + np.round((vec/factor_de_copadez)-np.floor(vec/factor_de_copadez)))
@@ -79,11 +79,11 @@ def generate_waterfall(img_dict):
 
     
 def mail_alerta(body,alarmas_cant=0,img_data_dict=None):   
-    to="matias.vargas@set.ypf.com,dario.kunik@ypftecnologia.com,sebastian.pedersen@set.ypf.com,pablo.orte@set.ypf.com"
+    to="matias.t.vargas@set.ypf.com,kunik.dario@set.ypf.com,pablo.j.orte@set.ypf.com"
     smtp_server="smtp-app-int.grupo.ypf.com"
     to_list=to.split(',')
     msg=MIMEMultipart()
-    msg['From']="matias.vargas@set.ypf.com"
+    msg['From']="matias.t.vargas@set.ypf.com"
     msg['To']=to
     subject='alertaDuctoCostero'
     if alarmas_cant>0:
@@ -98,7 +98,7 @@ def mail_alerta(body,alarmas_cant=0,img_data_dict=None):
     try:
         sv=smtplib.SMTP(smtp_server,25,timeout=30)
         sv.sendmail('',to_list,msg.as_string())
-        print body        
+        print body, datetime.datetime.now()       
         sv.quit()
     except:
         print "Falla mail"
