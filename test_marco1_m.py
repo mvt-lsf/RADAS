@@ -81,8 +81,8 @@ if __name__ == '__main__':
         ancho_zona=4
         bin_fin=bin_inicio+zonas*ancho_zona
 
-        umbrales={20:0.9,40:0.85}
-        ventana_alarma=150
+        umbrales={25:0.3,75:0.25}
+        ventana_alarma=300
         base_inicio=0
         base_fin=None #tal vez innecsario con el mecanismo de base larga
         print "Alarmas con: ", umbrales, "en ", ventana_alarma, " filas de std", 'bin inicio: ',bin_inicio, ' hasta ',bin_fin

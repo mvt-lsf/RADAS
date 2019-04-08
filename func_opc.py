@@ -58,9 +58,8 @@ def server_opc(zonas_cant,qAlarmas,OPC_alert):
     server.start()
     try:
         while True:
-            if qAlarmas!={} and len(qAlarmas)>0:#VER MODIFICACION
+            if len(qAlarmas)>0:
                 proxima_alarma=qAlarmas.popleft()
-                print proxima_alarma
                 #print proxima_alarma
                 if OPC_alert:
                     for zona in zonass[proxima_alarma]:
