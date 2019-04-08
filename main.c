@@ -1887,42 +1887,16 @@ int main()
     char *target = NULL;
     char *start, *end;
 
-    char *name_pozos[10];
-    char *placa;
-    bool rawsave_ch0 = false;
-    bool rawsave_ch1 = false;
-    bool stdsave = false;
-    bool mon_laser_save = false;
-    bool mon_edfa_save = false;
+    struct th_Data datos_thread;
     bool calcula_fft = false;
     bool calcula_osc = false;
-    int bins;
     int nro_pozos = 0;
     int chunksPorPozo;
-    int chunks_save;
-    int nCh;
-    int delay;
-    int bins_raw;
-    int delay_raw;
-    short nShotsChk;
     short nSubChk;
-    short qFreq;
-    int window_time;
     int window_time_osc;
-    int window_bin;
-    int window_bin_mean;
-    int bin_mon_laser_i;
-    int bin_mon_laser_f;
-    int bin_mon_edfa_i;
-    int bin_mon_edfa_f;
     int cant_curvas = 0;
-    float cLaser;
-    float cEDFA;
-    int chunk_fft_salteo;
-    int chunk_fft_promedio;
-    unsigned long long nShots = 0;
-    bool infinite_daq = true;
-    int i;
+
+    datos_thread.infinite_daq = true;
 
     while (fgets(line, sizeof(line), file_config))
     {
@@ -1955,31 +1929,31 @@ int main()
 
         if (strstr(line, "Placa:"))
         {
-            placa = target;
+            datos_thread.placa = target;
         }
         if (strstr(line, "Bins:"))
         {
-            bins = atoi(target);
+            datos_thread.bins = atoi(target);
         }
         if (strstr(line, "Delay:"))
         {
-            delay = atoi(target);
+            datos_thread.delay = atoi(target);
         }
         if (strstr(line, "Bins_raw:"))
         {
-            bins_raw = atoi(target);
+            datos_thread.bins_raw = atoi(target);
         }
         if (strstr(line, "Delay_raw:"))
         {
-            delay_raw = atoi(target);
+            datos_thread.delay_raw = atoi(target);
         }
         if (strstr(line, "ChunksPorPozo:"))
         {
-            chunksPorPozo = atoi(target);
+            datos_thread.chunksPorPozo = atoi(target);
         }
         if (strstr(line, "ChunksSave:"))
         {
-            chunks_save = atoi(target);
+            datos_thread.chunks_save = atoi(target);
         }
         if (strstr(line, "Nro. Pozos:"))
         {
@@ -1988,11 +1962,11 @@ int main()
         }
         if (strstr(line, "NCh:"))
         {
-            nCh = atoi(target);
+            datos_thread.nCh = atoi(target);
         }
         if (strstr(line, "NShotsChk:"))
         {
-            nShotsChk = atoi(target);
+            datos_thread.nShotsChk = atoi(target);
         }
         if (strstr(line, "NSubChk:"))
         {
@@ -2000,57 +1974,57 @@ int main()
         }
         if (strstr(line, "WindowTime:"))
         {
-            window_time = atoi(target);
+            datos_thread.window_time = atoi(target);
         }
         if (strstr(line, "WindowBin:"))
         {
-            window_bin = atoi(target);
+            datos_thread.window_bin = atoi(target);
         }
         if (strstr(line, "WindowBinMean:"))
         {
-            window_bin_mean = atoi(target);
+            datos_thread.window_bin_mean = atoi(target);
         }
         if (strstr(line, "Bin_mon_laser_i:"))
         {
-            bin_mon_laser_i = atoi(target);
+            datos_thread.bin_mon_laser_i = atoi(target);
         }
         if (strstr(line, "Bin_mon_laser_f:"))
         {
-            bin_mon_laser_f = atoi(target);
+            datos_thread.bin_mon_laser_f = atoi(target);
         }
         if (strstr(line, "Bin_mon_edfa_i:"))
         {
-            bin_mon_edfa_i = atoi(target);
+            datos_thread.bin_mon_edfa_i = atoi(target);
         }
         if (strstr(line, "Bin_mon_edfa_f:"))
         {
-            bin_mon_edfa_f = atoi(target);
+            datos_thread.bin_mon_edfa_f = atoi(target);
         }
         if (strstr(line, "ChunkSalteoFFT:"))
         {
-            chunk_fft_salteo = atoi(target);
+            datos_thread.chunk_fft_salteo = atoi(target);
         }
         if (strstr(line, "ChunkPromedioFFT:"))
         {
-            chunk_fft_promedio = atoi(target);
+            datos_thread.chunk_fft_promedio = atoi(target);
         }
         if (strstr(line, "nShots:"))
         {
-            nShots = atoi(target);
+            datos_thread.nShots = atoi(target);
         }
         if (strstr(line, "Calibracion_Laser:"))
         {
-            cLaser = atof(target);
+            datos_thread.cLaser = atof(target);
         }
         if (strstr(line, "Calibracion_EDFA:"))
         {
-            cEDFA = atof(target);
+            datos_thread.cEDFA = atof(target);
         }
         if (strstr(line, "qFreq:"))
         {
-            qFreq = atoi(target);
+            datos_thread.qFreq = atoi(target);
         }
-        for (i = 0; i < nro_pozos; i++)
+        for (int i = 0; i < nro_pozos; i++)
         {
             snprintf(line_pozos, sizeof(line_pozos), "Pozo%d:", i + 1);
             if (strstr(line, line_pozos))
@@ -2063,35 +2037,35 @@ int main()
         {
             if (strstr(target, "si"))
             {
-                rawsave_ch0 = true;
+                datos_thread.rawsave_ch0 = true;
             }
         }
         if (strstr(line, "GuardaRawDataCh1:"))
         {
             if (strstr(target, "si"))
             {
-                rawsave_ch1 = true;
+                datos_thread.rawsave_ch1 = true;
             }
         }
         if (strstr(line, "GuardaSTDData:"))
         {
             if (strstr(target, "si"))
             {
-                stdsave = true;
+                datos_thread.stdsave = true;
             }
         }
         if (strstr(line, "GuardaMonLaserData:"))
         {
             if (strstr(target, "si"))
             {
-                mon_laser_save = true;
+                datos_thread.mon_laser_save = true;
             }
         }
         if (strstr(line, "GuardaMonEdfaData:"))
         {
             if (strstr(target, "si"))
             {
-                mon_edfa_save = true;
+                datos_thread.mon_edfa_save = true;
             }
         }
         if (strstr(line, "CalculaFFT:"))
@@ -2112,11 +2086,11 @@ int main()
 
         if (strstr(line, "CantCurvasOsc:"))
         {
-            cant_curvas = atoi(target);
+            datos_thread.cant_curvas = atoi(target);
         }
         if (strstr(line, "WindowTimeOsc:"))
         {
-            window_time_osc = atoi(target);
+            datos_thread.window_time_osc = atoi(target);
         }
         target = NULL;
     }
@@ -2124,7 +2098,7 @@ int main()
 
     if (nShots > 0)
     {
-        bool infinite_daq = false;
+        datos_thread.infinite_daq = false;
     }
     /// FIN DE LA CARGA
     if (nShotsChk % nSubChk != 0)
@@ -2156,7 +2130,7 @@ int main()
     fclose(dest);
 
     /// Window time de monitoreo
-    int window_mon_time = window_time;
+    datos_thread.window_mon_time = window_time;      //Th_Data
 
     /// Aloca memoria del buffer
     chkBuffer = malloc((long long)bins * nShotsChk * nCh * CHUNKS * sizeof(short));
@@ -2168,67 +2142,30 @@ int main()
     printf("Puntero tss reservado: %p.\n", chkBuffer);
 
     /// Struct con parametros de los threads
-    struct th_Data DatosThread; // crea una estructura del tipo th_data
-    DatosThread.bins = bins;
-    DatosThread.nCh = nCh;
-    DatosThread.delay = delay;
-    DatosThread.nShotsChk = nShotsChk;
-    DatosThread.nShots = nShots;
-    DatosThread.qFreq = qFreq;
-    DatosThread.infinite_daq = infinite_daq;
-    DatosThread.window_time = window_time;
-    DatosThread.window_bin = window_bin;
-    DatosThread.window_bin_mean = window_bin_mean;
-
-    DatosThread.bins_raw = bins_raw;
-    DatosThread.delay_raw = delay_raw;
-
-    DatosThread.bin_mon_laser_i = bin_mon_laser_i;
-    DatosThread.bin_mon_laser_f = bin_mon_laser_f;
-    DatosThread.bin_mon_edfa_i = bin_mon_edfa_i;
-    DatosThread.bin_mon_edfa_f = bin_mon_edfa_f;
-    DatosThread.cLaser = cLaser;
-    DatosThread.cEDFA = cEDFA;
-    DatosThread.window_mon_time = window_mon_time;
-
-    DatosThread.chunk_fft_salteo = chunk_fft_salteo;
-    DatosThread.chunk_fft_promedio = chunk_fft_promedio;
-
-    DatosThread.placa = placa;
-    DatosThread.fname_dir = fname_dir;
-
-    DatosThread.chunks_save = chunks_save;
-    DatosThread.rawsave_ch0 = rawsave_ch0;
-    DatosThread.rawsave_ch1 = rawsave_ch1;
-    DatosThread.stdsave = stdsave;
-    DatosThread.mon_laser_save = mon_laser_save;
-    DatosThread.mon_edfa_save = mon_edfa_save;
-
-    DatosThread.cant_curvas = cant_curvas;
-    DatosThread.window_time_osc = window_time_osc;
+    struct th_Data datos_thread; // crea una estructura del tipo th_data
 
     /*llama la funci�n adquirir desde donde se lanzan el productor y se setea el callback*/
     adquirir(nCh, qFreq, 1, 1, bins, nShotsChk, nSubChk, delay);
     /*lanza el proceso procesaDTS_01 (el consumidor)*/
     DWORD rawID, stdID, monID, fftID, oscID;
     _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))raw_data_writer,
-                   (void *)&DatosThread, 0, (unsigned int *)&rawID);
+                   (void *)&datos_thread, 0, (unsigned int *)&rawID);
     _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))procesa_STD,
-                   (void *)&DatosThread, 0, (unsigned int *)&stdID);
+                   (void *)&datos_thread, 0, (unsigned int *)&stdID);
     if (nCh > 1)
     {
         _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))procesa_Monitoreo,
-                       (void *)&DatosThread, 0, (unsigned int *)&monID);
+                       (void *)&datos_thread, 0, (unsigned int *)&monID);
     }
     if (calcula_fft)
     {
         _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))procesa_FFT_banda,
-                       (void *)&DatosThread, 0, (unsigned int *)&fftID);
+                       (void *)&datos_thread, 0, (unsigned int *)&fftID);
     }
     if (calcula_osc)
     {
         _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))procesa_osc,
-                       (void *)&DatosThread, 0, (unsigned int *)&oscID);
+                       (void *)&datos_thread, 0, (unsigned int *)&oscID);
     }
 
     /*--------------------------*/
