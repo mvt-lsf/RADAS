@@ -18,7 +18,7 @@
 #define CHUNKS 40
 #define CONSUMIDORES 5
 
-//typedef enum { false, true } bool;
+// typedef enum { false, true } bool;
 
 double PCFreq = 0.0;
 __int64 CounterStart = 0;
@@ -299,7 +299,8 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1, int rangoDinCh2,
 	// variables placa
 	I16 Id, Id2,
 		card; // son requeridas por funciones de la placa para almacenar
-		      // cosas. son de uso exclusivo de las funciones de la placa
+		      // cosas. son de uso exclusivo de las funciones de la
+		      // placa
 	U16 card_type = PCIe_9852;
 	U16 card_num = CARDNUM; // arranca en 0, en esta compu hab�a dos placas
 				// la 0 y la 1.
@@ -321,8 +322,8 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1, int rangoDinCh2,
 		tamBuffer); // direcci�n de memoria del buffer de la ram
 			    // utilizado por la placa para descargar los datos.
 	// lo tiene que utilizar el callback que vaya a buscar los datos por lo
-	// que tine que ser global. Hay un buffer en la ram por cada buffer en la
-	// placa.
+	// que tine que ser global. Hay un buffer en la ram por cada buffer en
+	// la placa.
 	if (!ai_buf) {
 		printf("buffer1 allocation failed\n");
 		exit(1);
@@ -526,7 +527,7 @@ void *raw_data_writer(void *n)
 	//    if (nCh == 1 && rawsave_ch1){
 	//		caso = 0;
 	//		printf("No se guarda Raw Data. Con un canal solo se
-	//adquiere el canal Ch0. \n");
+	// adquiere el canal Ch0. \n");
 	//    }
 
 	char dire_ch0[70];
@@ -1889,7 +1890,7 @@ int main()
 			}
 		}
 
-        parse_th_config(&datos_thread, line, target);
+		parse_th_config(&datos_thread, line, target);
 
 		if (strstr(line, "NSubChk:")) {
 			nSubChk = atoi(target);
@@ -1901,7 +1902,7 @@ int main()
 				datos_thread.name_pozos[i] = target;
 			}
 		}
-        
+
 		if (strstr(line, "CalculaFFT:")) {
 			if (strstr(target, "si")) {
 				calcula_fft = true;
