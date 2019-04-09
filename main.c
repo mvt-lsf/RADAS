@@ -71,18 +71,8 @@ struct
     short *ai_buf2; // este es un puntero short porque los elementos del buffer de la placa son shorts, cuando lo indexemos se va a mover de a un short en memoria, de forma de ir pasando de elemento a elemento.
     bool disponible[CHUNKS];
     bool ovr;
-    //int contadorPozo; // contador: indica en que chunk estamos para este pozo
-    //int chunksPorPozo;// cantiad de chunks por Pozo
-    //bool pausa; // este indica si esteamos eperando que se ejecute el cambio de pozo
-    //HANDLE cambio_pozo; // defini un envento para avisar que se debe cambiar de pozo
     HANDLE semConsumidor[CONSUMIDORES];
 } callback;
-/* se definen como globales los tipos de datos que utilizan los procesos. Los porcesos no admiten ning�n tipo de argumento
- porque es un creador de una funci�n, tiene que ser capaz de poder ejecutar culaquier cosa. Lo que se hace es pasarle un puntero a void y en esa direcci�n se
- cargan todos los par�metros que necesita el proceso. La �nica alternativa es tener todas las variables del proceso como globales. Una vez definido el tipo
- cuando se lanza el proceso se crea un estructura particular del tipo correspondiente y se le pasa la direcci�n de memoria al proceso. dentro del proceso
- se accede a las variables*/
-
 
 void *procesa_FFT_banda(void *n)
 {
@@ -155,21 +145,6 @@ void *procesa_FFT_banda(void *n)
     snprintf(command, 100, "start python pipe_fft_abs.py %d %d %d ", bins, nShotsChk, qFreq);
     printf(command);
     system(command);
-
-    /*    DWORD leido_paip_bandas;
-    HANDLE paip_bandas = CreateNamedPipe(TEXT("\\\\.\\pipe\\PipeFFT_bandas"),
-                            PIPE_ACCESS_DUPLEX | PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,   // FILE_FLAG_FIRST_PIPE_INSTANCE is not needed but forces CreateNamedPipe(..) to fail if the pipe already exists...
-                            PIPE_WAIT,
-                            1,
-                            (bins-window_bin_std+1)*sizeof(float)*8,
-                            (bins-window_bin_std+1)*sizeof(float)*8,
-                            NMPWAIT_USE_DEFAULT_WAIT,
-                            NULL);
-    */
-    // char command1[100];
-    //snprintf(command1,100,"start python fft_bandas_interfaz_1.py %d %d %d",bins-window_bin_std+1,qFreq, nShotsChk/2+1);
-    //printf(command1);
-    //system(command1);
 
     int cnt_salteo = 0;
     int cnt_promedio = 0;
@@ -311,31 +286,6 @@ void AI_CallBack()
     return;
 }
 
-//void* cambio_de_pozo(void* n){
-//
-//    char* buffer=calloc(10,sizeof(char)); // crea el string y lo inicializa es un malloc inicializado con 0
-//    char* cambio="CAMBIAME EL POZO"; // string a enviar a python
-//    //lanzar proceso de cambio de pozo en python
-//    ConnectNamedPipe(pipePozoCRead,NULL);
-//
-//    while(true){
-//        printf("vivito y coleando\n");
-//        WaitForSingleObject(callback.cambio_pozo,INFINITE);
-//        printf("por favor Cambia el pozo\n");
-//        DWORD leido_pipe,leido_pipe2;
-//        WriteFile(pipePozoCWrite,cambio,sizeof(char)*17,&leido_pipe,NULL);
-//        ReadFile(pipePozoCRead,buffer,sizeof(char)*10,&leido_pipe2,NULL);
-//        if(strcmp(buffer,"CAMBIO OK")==0){// habia un 0
-//            callback.pausa=false;
-//            memset(buffer,0,10);
-//        }else{
-//            printf("Falla multiplexer.\n");
-//        }
-//
-//    }
-//
-//
-//}
 
 void adquirir(short nCh, int qFreqAdq, int rangoDinCh1, int rangoDinCh2, int bins, int nShotsChk, int nSubChk, int delay)
 {
@@ -472,13 +422,7 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1, int rangoDinCh2, int bin
     callback.ai_buf2 = ai_buf2;
     callback.bufferActual = true;
     callback.chkActual = 0;
-    //callback.cambio_pozo=CreateEvent(NULL,false,false,NULL);
-    //callback.pausa=false;
-    //callback.contadorPozo=0;
-    //    DWORD pozoID;
-    //    _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void*))cambio_de_pozo,
-    //	0, 0, pozoID);
-    //inicializa disponible
+    
     int i;
     for (i = 0; i < CHUNKS; ++i)
         callback.disponible[i] = true;
@@ -993,24 +937,6 @@ void *procesa_osc(void *n)
         WaitForSingleObject(callback.semConsumidor[4], INFINITE);
 
         memset(procesado, 0, bins * cant_curvas * sizeof(float) * nCh);
-        //        memset(mean_w_ch1,0,bins*nShotsChk*sizeof(float));
-        //
-        //        for(i=0;i<bins*(window_time-1);++i){ ///calcula ventana-1
-        //            mean_w_ch0[i%bins]+=(float)(chunk_actual[i*nCh]);
-        //            mean_w_ch1[i%bins]+=(float)(chunk_actual[i*nCh+1]);
-        //        }
-        //
-        //        for(i=bins*(window_time-1);i<bins*window_time;++i){ ///termina ventana
-        //            mean_w_ch0[i%bins]=(mean_w_ch0[i%bins]+ (float)(chunk_actual[i*nCh]))/window_time;
-        //            mean_w_ch1[i%bins]=(mean_w_ch1[i%bins]+ (float)(chunk_actual[i*nCh+1]))/window_time;
-        //        }
-        //    //    printf("AndaPrimeraWindow\n");
-        //
-        //        for(i=bins*window_time;i<bins*nShotsChk;++i){///resta y suma el apropiado a la ventana calculada
-        //                mean_w_ch0[(i-bins*(window_time-1))]=mean_w_ch0[(i-bins*(window_time))]+((float)(chunk_actual[i*nCh])-(float)(chunk_actual[nCh*(i-bins*(window_time))]))/window_time;
-        //                mean_w_ch1[(i-bins*(window_time-1))]=mean_w_ch1[(i-bins*(window_time))]+((float)(chunk_actual[i*nCh+1])-(float)(chunk_actual[nCh*(i-bins*(window_time))+1]))/window_time;
-        //        }
-
         for (i = 0; i < cant_curvas; ++i)
         {
 
