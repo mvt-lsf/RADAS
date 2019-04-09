@@ -18,7 +18,7 @@
 #define CHUNKS 40
 #define CONSUMIDORES 5
 
-typedef enum { false, true } bool;
+//typedef enum { false, true } bool;
 
 double PCFreq = 0.0;
 __int64 CounterStart = 0;
@@ -1868,9 +1868,6 @@ int main()
 	datos_thread.infinite_daq = true;
 
 	while (fgets(line, sizeof(line), file_config)) {
-		/* note that fgets don't strip the terminating \n, checking its
-		       presence would allow to handle lines longer that
-		   sizeof(line) */
 		printf("%s", line);
 
 		/// Busco string
@@ -1892,78 +1889,10 @@ int main()
 			}
 		}
 
-		if (strstr(line, "Placa:")) {
-			datos_thread.placa = target;
-		}
-		if (strstr(line, "Bins:")) {
-			datos_thread.bins = atoi(target);
-		}
-		if (strstr(line, "Delay:")) {
-			datos_thread.delay = atoi(target);
-		}
-		if (strstr(line, "Bins_raw:")) {
-			datos_thread.bins_raw = atoi(target);
-		}
-		if (strstr(line, "Delay_raw:")) {
-			datos_thread.delay_raw = atoi(target);
-		}
-		if (strstr(line, "ChunksPorPozo:")) {
-			chunksPorPozo = atoi(target);
-		}
-		if (strstr(line, "ChunksSave:")) {
-			datos_thread.chunks_save = atoi(target);
-		}
-		if (strstr(line, "Nro. Pozos:")) {
-			nro_pozos = atoi(target);
-			char *name_pozos[nro_pozos];
-		}
-		if (strstr(line, "NCh:")) {
-			datos_thread.nCh = atoi(target);
-		}
-		if (strstr(line, "NShotsChk:")) {
-			datos_thread.nShotsChk = atoi(target);
-		}
+        parse_th_config(&datos_thread, line, target);
+
 		if (strstr(line, "NSubChk:")) {
 			nSubChk = atoi(target);
-		}
-		if (strstr(line, "WindowTime:")) {
-			datos_thread.window_time = atoi(target);
-		}
-		if (strstr(line, "WindowBin:")) {
-			datos_thread.window_bin = atoi(target);
-		}
-		if (strstr(line, "WindowBinMean:")) {
-			datos_thread.window_bin_mean = atoi(target);
-		}
-		if (strstr(line, "Bin_mon_laser_i:")) {
-			datos_thread.bin_mon_laser_i = atoi(target);
-		}
-		if (strstr(line, "Bin_mon_laser_f:")) {
-			datos_thread.bin_mon_laser_f = atoi(target);
-		}
-		if (strstr(line, "Bin_mon_edfa_i:")) {
-			datos_thread.bin_mon_edfa_i = atoi(target);
-		}
-		if (strstr(line, "Bin_mon_edfa_f:")) {
-			datos_thread.bin_mon_edfa_f = atoi(target);
-		}
-		if (strstr(line, "ChunkSalteoFFT:")) {
-			datos_thread.chunk_fft_salteo = atoi(target);
-		}
-		if (strstr(line, "ChunkPromedioFFT:")) {
-			datos_thread.chunk_fft_promedio = atoi(target);
-		}
-		if (strstr(line, "nShots:")) {
-			datos_thread.nShots = atoi(target);
-		}
-		if (strstr(line, "Calibracion_Laser:")) {
-			datos_thread.cLaser = atof(target);
-		}
-		if (strstr(line, "Calibracion_EDFA:")) {
-			datos_thread.cEDFA = atof(target);
-		}
-		if (strstr(line, "qFreq:")) {
-			datos_thread.qFreq = atoi(target);
 		}
 		for (int i = 0; i < nro_pozos; i++) {
 			snprintf(line_pozos, sizeof(line_pozos),
@@ -1972,32 +1901,7 @@ int main()
 				datos_thread.name_pozos[i] = target;
 			}
 		}
-
-		if (strstr(line, "GuardaRawDataCh0:")) {
-			if (strstr(target, "si")) {
-				datos_thread.rawsave_ch0 = true;
-			}
-		}
-		if (strstr(line, "GuardaRawDataCh1:")) {
-			if (strstr(target, "si")) {
-				datos_thread.rawsave_ch1 = true;
-			}
-		}
-		if (strstr(line, "GuardaSTDData:")) {
-			if (strstr(target, "si")) {
-				datos_thread.stdsave = true;
-			}
-		}
-		if (strstr(line, "GuardaMonLaserData:")) {
-			if (strstr(target, "si")) {
-				datos_thread.mon_laser_save = true;
-			}
-		}
-		if (strstr(line, "GuardaMonEdfaData:")) {
-			if (strstr(target, "si")) {
-				datos_thread.mon_edfa_save = true;
-			}
-		}
+        
 		if (strstr(line, "CalculaFFT:")) {
 			if (strstr(target, "si")) {
 				calcula_fft = true;
@@ -2008,13 +1912,6 @@ int main()
 			if (strstr(target, "si")) {
 				calcula_osc = true;
 			}
-		}
-
-		if (strstr(line, "CantCurvasOsc:")) {
-			datos_thread.cant_curvas = atoi(target);
-		}
-		if (strstr(line, "WindowTimeOsc:")) {
-			datos_thread.window_time_osc = atoi(target);
 		}
 		target = NULL;
 	}

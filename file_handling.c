@@ -1,6 +1,6 @@
 #include <file_handling.h>
 
-void read_string(struct th_Data *data, char *line, char *target)
+void parse_th_config(struct th_Data *data, char *line, char *target)
 {
 	if (strstr(line, "Placa:"))
 		data->placa = target;
@@ -63,5 +63,4 @@ void read_string(struct th_Data *data, char *line, char *target)
 		data->cant_curvas = atoi(target);
 	if (strstr(line, "WindowTimeOsc:"))
 		data->window_time_osc = atoi(target);
-	target = NULL;
 }
