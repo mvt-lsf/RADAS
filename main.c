@@ -591,7 +591,7 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1, int rangoDinCh2, int bin
 
 void *raw_data_writer(void *n)
 {
-
+    struct th_Data *data = (struct th_Data *)n;
     int bins = data->bins;
     int delay = data->delay;
     int bins_raw = data->bins_raw;
@@ -1127,7 +1127,7 @@ void ts_fill(SYSTEMTIME ts, unsigned short *ts_pipe)
 
 void *procesa_STD(void *n)
 {
-
+    struct th_Data *data = (struct th_Data *)n;
     int bins = data->bins;
     int delay = data->delay;
     int nShotsChk = data->nShotsChk;
@@ -1753,7 +1753,7 @@ void *procesa_Monitoreo(void *n)
 
 void *procesa_FFT(void *n)
 {
-
+    struct th_Data *data = (struct th_Data *)n;
     int nCh = data->nCh;
     int bins = data->bins;
     int qFreq = data->qFreq;
@@ -2097,12 +2097,12 @@ int main()
     }
     fclose(file_config);
 
-    if (nShots > 0)
+    if (datos_thread.nShots > 0)
     {
         datos_thread.infinite_daq = false;
     }
     /// FIN DE LA CARGA
-    if (nShotsChk % nSubChk != 0)
+    if (datos_thread.nShotsChk % nSubChk != 0)
     {
         printf("Error: NShotsChk/NSubChk debe ser un numero entero");
         salir = true;
@@ -2131,10 +2131,10 @@ int main()
     fclose(dest);
 
     /// Window time de monitoreo
-    datos_thread.window_mon_time = window_time;      //Th_Data
+    datos_thread.window_mon_time = datos_thread.window_time;      //Th_Data
 
     /// Aloca memoria del buffer
-    chkBuffer = malloc((long long)bins * nShotsChk * nCh * CHUNKS * sizeof(short));
+    chkBuffer = malloc((long long)datos_thread.bins * datos_thread.nShotsChk * datos_thread.nCh * CHUNKS * sizeof(short));
     //long tamanio=5L*1024L*1024L*1024L;
     printf("Puntero chunks reservado: %p.\n", chkBuffer);
 
@@ -2146,14 +2146,14 @@ int main()
     struct th_Data datos_thread; // crea una estructura del tipo th_data
 
     /*llama la funci�n adquirir desde donde se lanzan el productor y se setea el callback*/
-    adquirir(nCh, qFreq, 1, 1, bins, nShotsChk, nSubChk, delay);
+    adquirir(datos_thread.nCh, datos_thread.qFreq, 1, 1, datos_thread.bins, datos_thread.nShotsChk, nSubChk, datos_thread.delay);
     /*lanza el proceso procesaDTS_01 (el consumidor)*/
     DWORD rawID, stdID, monID, fftID, oscID;
     _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))raw_data_writer,
                    (void *)&datos_thread, 0, (unsigned int *)&rawID);
     _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))procesa_STD,
                    (void *)&datos_thread, 0, (unsigned int *)&stdID);
-    if (nCh > 1)
+    if (datos_thread.nCh > 1)
     {
         _beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))procesa_Monitoreo,
                        (void *)&datos_thread, 0, (unsigned int *)&monID);
@@ -2180,7 +2180,7 @@ int main()
         Sleep(1);
     while (salir_std == 0)
         Sleep(1);
-    if (nCh > 1)
+    if (datos_thread.nCh > 1)
     {
         while (salir_monitoreo == 0)
             Sleep(1);
@@ -2198,7 +2198,7 @@ int main()
 
     CloseHandle(rawID);
     CloseHandle(stdID);
-    if (nCh > 1)
+    if (datos_thread.nCh > 1)
     {
         CloseHandle(monID);
     }
