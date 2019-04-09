@@ -4,6 +4,7 @@
 //#include <windows.h>
 //#include <process.h>
 //#include <conio.h>
+#include <math_functions.h>
 #include <math.h>
 #include <memory.h>
 #include <WD-dask64.h>
@@ -62,9 +63,7 @@ struct th_Data
 struct th_Data parse_config(FILE *file);
 double GetCounter();
 void StartCounter();
-float* moving1avg_full(float* vector,unsigned int vector_size ,unsigned int window, float* vector_avg);
 void *procesa_FFT_banda(void *n);
-float *moving1avg(float *vector, unsigned int vector_size, unsigned int window, float *vector_avg, unsigned int vector_avg_size);
 void AI_CallBack();
 void adquirir(short nCh, int qFreqAdq, int rangoDinCh1, int rangoDinCh2, int bins, int nShotsChk, int nSubChk, int delay);
 void *raw_data_writer(void *n);
