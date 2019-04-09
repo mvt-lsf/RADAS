@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <windows.h>
-#include <process.h>
-#include <conio.h>
+//#include <windows.h>
+//#include <process.h>
+//#include <conio.h>
 #include <math.h>
 #include <memory.h>
 #include <WD-dask64.h>

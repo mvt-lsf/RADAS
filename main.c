@@ -124,17 +124,17 @@ float *moving1avg_full(float *vector, unsigned int vector_size, unsigned int win
 
 void *procesa_FFT_banda(void *n)
 {
-
-    int nCh = (*(th_Data *)n).nCh;
-    int bins = (*(th_Data *)n).bins;
-    int qFreq = (*(th_Data *)n).qFreq;
-    int nShotsChk = (*(th_Data *)n).nShotsChk;
-    int chunk_fft_salteo = (*(th_Data *)n).chunk_fft_salteo;
-    int chunk_fft_promedio = (*(th_Data *)n).chunk_fft_promedio;
-    int window_bin_std = (*(th_Data *)n).window_bin_std;
-    int window_bin_mean = (*(th_Data *)n).window_bin_mean;
-    int bin_mon_edfa_i = (*(th_Data *)n).bin_mon_edfa_i;
-    int bin_mon_edfa_f = (*(th_Data *)n).bin_mon_edfa_f;
+    struct th_Data *data = (struct th_Data *)n;
+    int nCh = data->nCh;
+    int bins = data->bins;
+    int qFreq = data->qFreq;
+    int nShotsChk = data->nShotsChk;
+    int chunk_fft_salteo = data->chunk_fft_salteo;
+    int chunk_fft_promedio = data->chunk_fft_promedio;
+    //int window_bin_std = data->window_bin_std;
+    int window_bin_mean = data->window_bin_mean;
+    int bin_mon_edfa_i = data->bin_mon_edfa_i;
+    int bin_mon_edfa_f = data->bin_mon_edfa_f;
 
     // Buffer float para fft
     int n_t = 8;
@@ -592,20 +592,20 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1, int rangoDinCh2, int bin
 void *raw_data_writer(void *n)
 {
 
-    int bins = (*(th_Data *)n).bins;
-    int delay = (*(th_Data *)n).delay;
-    int bins_raw = (*(th_Data *)n).bins_raw;
-    int delay_raw = (*(th_Data *)n).delay_raw;
-    int chunks_save = (*(th_Data *)n).chunks_save;
-    int nShotsChk = (*(th_Data *)n).nShotsChk;
-    int nCh = (*(th_Data *)n).nCh;
-    int qFreq = (*(th_Data *)n).qFreq;
-    long long nShots = (*(th_Data *)n).nShots;
-    bool infinite_daq = (*(th_Data *)n).infinite_daq;
-    char *fname_dir = (*(th_Data *)n).fname_dir;
-    char *placa = (*(th_Data *)n).placa;
-    bool rawsave_ch0 = (*(th_Data *)n).rawsave_ch0;
-    bool rawsave_ch1 = (*(th_Data *)n).rawsave_ch1;
+    int bins = data->bins;
+    int delay = data->delay;
+    int bins_raw = data->bins_raw;
+    int delay_raw = data->delay_raw;
+    int chunks_save = data->chunks_save;
+    int nShotsChk = data->nShotsChk;
+    int nCh = data->nCh;
+    int qFreq = data->qFreq;
+    long long nShots = data->nShots;
+    bool infinite_daq = data->infinite_daq;
+    char *fname_dir = data->fname_dir;
+    char *placa = data->placa;
+    bool rawsave_ch0 = data->rawsave_ch0;
+    bool rawsave_ch1 = data->rawsave_ch1;
     bool rawsave = false;
     int nCh_copia = 0;
 
@@ -1017,16 +1017,17 @@ void *raw_data_writer(void *n)
 
 void *procesa_osc(void *n)
 {
-    int bins = (*(th_Data *)n).bins;
-    int delay = (*(th_Data *)n).delay;
-    int nShotsChk = (*(th_Data *)n).nShotsChk;
-    int nCh = (*(th_Data *)n).nCh;
-    int qFreq = (*(th_Data *)n).qFreq;
-    long long nShots = (*(th_Data *)n).nShots;
-    bool infinite_daq = (*(th_Data *)n).infinite_daq;
-    int window_time_osc = (*(th_Data *)n).window_time_osc;
-    char *placa = (*(th_Data *)n).placa;
-    int cant_curvas = (*(th_Data *)n).cant_curvas;
+    struct th_Data *data = (struct th_Data *)n;
+    int bins = data->bins;
+    int delay = data->delay;
+    int nShotsChk = data->nShotsChk;
+    int nCh = data->nCh;
+    int qFreq = data->qFreq;
+    long long nShots = data->nShots;
+    bool infinite_daq = data->infinite_daq;
+    int window_time_osc = data->window_time_osc;
+    char *placa = data->placa;
+    int cant_curvas = data->cant_curvas;
 
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
@@ -1127,20 +1128,20 @@ void ts_fill(SYSTEMTIME ts, unsigned short *ts_pipe)
 void *procesa_STD(void *n)
 {
 
-    int bins = (*(th_Data *)n).bins;
-    int delay = (*(th_Data *)n).delay;
-    int nShotsChk = (*(th_Data *)n).nShotsChk;
-    int chunks_save = (*(th_Data *)n).chunks_save;
-    int nCh = (*(th_Data *)n).nCh;
-    int qFreq = (*(th_Data *)n).qFreq;
-    long long nShots = (*(th_Data *)n).nShots;
-    bool infinite_daq = (*(th_Data *)n).infinite_daq;
-    int window_time = (*(th_Data *)n).window_time;
-    int window_bin = (*(th_Data *)n).window_bin;
-    int window_bin_mean = (*(th_Data *)n).window_bin_mean;
-    char *fname_dir = (*(th_Data *)n).fname_dir;
-    char *placa = (*(th_Data *)n).placa;
-    bool stdsave = (*(th_Data *)n).stdsave;
+    int bins = data->bins;
+    int delay = data->delay;
+    int nShotsChk = data->nShotsChk;
+    int chunks_save = data->chunks_save;
+    int nCh = data->nCh;
+    int qFreq = data->qFreq;
+    long long nShots = data->nShots;
+    bool infinite_daq = data->infinite_daq;
+    int window_time = data->window_time;
+    int window_bin = data->window_bin;
+    int window_bin_mean = data->window_bin_mean;
+    char *fname_dir = data->fname_dir;
+    char *placa = data->placa;
+    bool stdsave = data->stdsave;
 
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
@@ -1419,28 +1420,28 @@ void *procesa_STD(void *n)
 
 void *procesa_Monitoreo(void *n)
 {
-
-    int bins = (*(th_Data *)n).bins;
-    int delay = (*(th_Data *)n).delay;
-    int nShotsChk = (*(th_Data *)n).nShotsChk;
-    int chunks_save = (*(th_Data *)n).chunks_save;
-    int nCh = (*(th_Data *)n).nCh;
-    int qFreq = (*(th_Data *)n).qFreq;
-    long long nShots = (*(th_Data *)n).nShots;
-    bool infinite_daq = (*(th_Data *)n).infinite_daq;
-    int window_time = (*(th_Data *)n).window_time;
-    int window_bin = (*(th_Data *)n).window_bin;
-    int bin_mon_laser_i = (*(th_Data *)n).bin_mon_laser_i;
-    int bin_mon_laser_f = (*(th_Data *)n).bin_mon_laser_f;
-    int bin_mon_edfa_i = (*(th_Data *)n).bin_mon_edfa_i;
-    int bin_mon_edfa_f = (*(th_Data *)n).bin_mon_edfa_f;
-    int window_mon_time = (*(th_Data *)n).window_mon_time;
-    char *fname_dir = (*(th_Data *)n).fname_dir;
-    char *placa = (*(th_Data *)n).placa;
-    bool mon_edfa_save = (*(th_Data *)n).mon_edfa_save;
-    bool mon_laser_save = (*(th_Data *)n).mon_laser_save;
-    float cLaser = (*(th_Data *)n).cLaser;
-    float cEDFA = (*(th_Data *)n).cEDFA;
+    struct th_Data *data = (struct th_Data *)n;
+    int bins = data->bins;
+    int delay = data->delay;
+    int nShotsChk = data->nShotsChk;
+    int chunks_save = data->chunks_save;
+    int nCh = data->nCh;
+    int qFreq = data->qFreq;
+    long long nShots = data->nShots;
+    bool infinite_daq = data->infinite_daq;
+    int window_time = data->window_time;
+    int window_bin = data->window_bin;
+    int bin_mon_laser_i = data->bin_mon_laser_i;
+    int bin_mon_laser_f = data->bin_mon_laser_f;
+    int bin_mon_edfa_i = data->bin_mon_edfa_i;
+    int bin_mon_edfa_f = data->bin_mon_edfa_f;
+    int window_mon_time = data->window_mon_time;
+    char *fname_dir = data->fname_dir;
+    char *placa = data->placa;
+    bool mon_edfa_save = data->mon_edfa_save;
+    bool mon_laser_save = data->mon_laser_save;
+    float cLaser = data->cLaser;
+    float cEDFA = data->cEDFA;
 
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
@@ -1753,12 +1754,12 @@ void *procesa_Monitoreo(void *n)
 void *procesa_FFT(void *n)
 {
 
-    int nCh = (*(th_Data *)n).nCh;
-    int bins = (*(th_Data *)n).bins;
-    int qFreq = (*(th_Data *)n).qFreq;
-    int nShotsChk = (*(th_Data *)n).nShotsChk;
-    int chunk_fft_salteo = (*(th_Data *)n).chunk_fft_salteo;
-    int chunk_fft_promedio = (*(th_Data *)n).chunk_fft_promedio;
+    int nCh = data->nCh;
+    int bins = data->bins;
+    int qFreq = data->qFreq;
+    int nShotsChk = data->nShotsChk;
+    int chunk_fft_salteo = data->chunk_fft_salteo;
+    int chunk_fft_promedio = data->chunk_fft_promedio;
 
     // Buffer float para fft
     int n_t = 8;
@@ -1949,7 +1950,7 @@ int main()
         }
         if (strstr(line, "ChunksPorPozo:"))
         {
-            datos_thread.chunksPorPozo = atoi(target);
+            chunksPorPozo = atoi(target);
         }
         if (strstr(line, "ChunksSave:"))
         {
@@ -2029,7 +2030,7 @@ int main()
             snprintf(line_pozos, sizeof(line_pozos), "Pozo%d:", i + 1);
             if (strstr(line, line_pozos))
             {
-                name_pozos[i] = target;
+                datos_thread.name_pozos[i] = target;
             }
         }
 
