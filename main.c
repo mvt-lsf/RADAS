@@ -83,7 +83,6 @@ void *procesa_FFT_banda(void *n)
     int nShotsChk = data->nShotsChk;
     int chunk_fft_salteo = data->chunk_fft_salteo;
     int chunk_fft_promedio = data->chunk_fft_promedio;
-    //int window_bin_std = data->window_bin_std;
     int window_bin_mean = data->window_bin_mean;
     int bin_mon_edfa_i = data->bin_mon_edfa_i;
     int bin_mon_edfa_f = data->bin_mon_edfa_f;
@@ -101,27 +100,6 @@ void *procesa_FFT_banda(void *n)
     float *fft_0 = malloc(bins * sizeof(float));
     float *fft_0_mean = malloc(bins * sizeof(float));
 
-    double tiempo;
-    /*
-    /// Calculo de bandas
-    float* banda_a = malloc(bins*sizeof(float));
-    float* banda_b = malloc(bins*sizeof(float));
-    float* banda_c = malloc(bins*sizeof(float));
-
-    float* banda_a_mvg = malloc((bins-window_bin_std+1)*sizeof(float));
-    float* banda_b_mvg = malloc((bins-window_bin_std+1)*sizeof(float));
-    float* banda_c_mvg = malloc((bins-window_bin_std+1)*sizeof(float));
-
-    float* super_banda = malloc(3*(bins-window_bin_std+1)*sizeof(float));
-
-    int banda_ai;
-    int banda_af;
-    int banda_bi;
-    int banda_bf;
-    int banda_ci;
-    int banda_cf;
-    */
-    /// Plan p2 fft: datos sin ordenar, luego fftw ordena
     int istride = 1 * bins;
     int ostride = 1;
     int idist = 1;
@@ -161,15 +139,6 @@ void *procesa_FFT_banda(void *n)
 
         WaitForSingleObject(callback.semConsumidor[3], INFINITE);
 
-        //        cnt_salteo++;
-
-        //      if (cnt_salteo%(chunk_fft_salteo+1) != 0){
-        //        continue;
-        //  }
-        //cnt_salteo = 0;
-
-        //StartCounter();
-
         for (i = 0; i < nShotsChk; ++i)
         {
             off_e_edfa = 2 * (i * bins + bin_mon_edfa_i); // para posicionar en el bin correspondiente del canal 1
@@ -196,7 +165,7 @@ void *procesa_FFT_banda(void *n)
 
         moving1avg_full(fft_0, bins, window_bin_mean, fft_0_mean);
 
-        /// Calcula el valor absoluto
+        /// Calcula el valor absoluto, esto ya es usado por mas de una funcion, repeticion de codigo.
         for (i = 0; i < ((nShotsChk / 2) + 1) * bins; ++i)
         {
             out_abs[i] = sqrt(out[i][0] * out[i][0] + out[i][1] * out[i][1]) / fft_0_mean[i / (nShotsChk / 2 + 1)] * 2; ///paralelizar
@@ -205,11 +174,8 @@ void *procesa_FFT_banda(void *n)
 
             out_abs_acc[i] += out_abs[i];
         }
-        //StartCounter();
-        WriteFile(paip, &out_abs[0], sizeof(float) * bins * (1 + (nShotsChk / 2)), &leido_paip, NULL);
 
-        //tiempo = GetCounter();
-        //  printf("tiempo Escribir Toda la FFT: %.5f \n",tiempo/1000.0);
+        WriteFile(paip, &out_abs[0], sizeof(float) * bins * (1 + (nShotsChk / 2)), &leido_paip, NULL);
 
         chunk_control++;
         if (chunk_control == CHUNKS)
@@ -980,7 +946,7 @@ void ts_fill(SYSTEMTIME ts, unsigned short *ts_pipe)
     ts_pipe[6] = ts.wMilliseconds;
 }
 
-void *procesa_STD(void *n)
+void *procesa_STD(void *n)      //Sucede lo mismo que con procesa_monitoreo
 {
     struct th_Data *data = (struct th_Data *)n;
     int bins = data->bins;
@@ -1273,7 +1239,7 @@ void *procesa_STD(void *n)
     return NULL;
 }
 
-void *procesa_Monitoreo(void *n)
+void *procesa_Monitoreo(void *n)    //Se encarga de manejar la memoria, procesar y guardar la configuracion ademas de escribir los datos... esta va a la guillotina
 {
     struct th_Data *data = (struct th_Data *)n;
     int bins = data->bins;
@@ -1606,7 +1572,7 @@ void *procesa_Monitoreo(void *n)
     return NULL;
 }
 
-void *procesa_FFT(void *n)
+void *procesa_FFT(void *n) //acepta solamente un th_Data, se podria mover de lugar
 {
     struct th_Data *data = (struct th_Data *)n;
     int nCh = data->nCh;
@@ -1679,7 +1645,7 @@ void *procesa_FFT(void *n)
 
         //printf("FFT: %f, %f, %f \n",out[2000*10+1][0],out[2000*10+2][0],out[2000*10+3][0]);
 
-        /// Calcula el valor absoluto
+        /// Calcula el valor absoluto, se podria pasar a su propia funcion
         for (i = 0; i < ((nShotsChk / 2) + 1) * bins; ++i)
         {
             out_abs[i] = out[i][0] * out[i][0] + out[i][1] * out[i][1]; ///paralelizar
