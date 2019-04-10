@@ -50,3 +50,7 @@ struct th_Data {
 	float cLaser;
 	float cEDFA;
 };
+
+struct config{
+	struct th_Data *th_data;
+};
