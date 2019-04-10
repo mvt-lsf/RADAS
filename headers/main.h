@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-#ifndef bools
-#define bools
+#ifndef BOOLS
+#define BOOLS
 #include <stdbool.h>
 #endif
 
@@ -13,9 +13,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <file_handling.h>
-//#include <windows.h>
-//#include <process.h>
-//#include <conio.h>
+#include <windows.h>
+#include <process.h>
+#include <conio.h>
 #include <math_functions.h>
 #include <math.h>
 #include <memory.h>
