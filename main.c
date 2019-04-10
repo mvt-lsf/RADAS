@@ -1955,7 +1955,7 @@ int main()
 	/// Aloca memoria del buffer
 	chkBuffer = malloc((long long)datos_thread.bins * datos_thread.nShotsChk
 			   * datos_thread.nCh * CHUNKS * sizeof(short));
-	// long tamanio=5L*1024L*1024L*1024L;
+	// long tamanio=5L*1024L*1024L*1024L;procesa_FFT
 	printf("Puntero chunks reservado: %p.\n", chkBuffer);
 
 	tssBuffer = malloc(CHUNKS * sizeof(SYSTEMTIME));

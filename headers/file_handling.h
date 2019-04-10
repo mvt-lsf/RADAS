@@ -1,5 +1,5 @@
-#ifndef bools
-#define bools
+#ifndef BOOLS
+#define BOOLS
 #include <stdbool.h>
 #endif
 
