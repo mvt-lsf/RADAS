@@ -8,7 +8,11 @@
 #include "structs.h"
 #endif
 
+#ifndef STDLIB_H
+#define STDLIB_H
 #include <stdlib.h>
+#endif
+
 #include <stdio.h>
 #include <time.h>
 
@@ -19,8 +23,8 @@
 #include <memory.h>
 
 
-#include <WD-dask64.h>
-#include <fftw3.h>
+#include "WD-dask64.h"
+#include "fftw3.h"
 
 #include "math_functions.h"
 #include "file_handling.h"

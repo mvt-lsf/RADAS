@@ -1963,7 +1963,7 @@ int main()
 	printf("Puntero tss reservado: %p.\n", chkBuffer);
 
 	/// Struct con parametros de los threads
-	struct th_Data datos_thread; // crea una estructura del tipo th_data
+	//struct th_Data datos_thread; // crea una estructura del tipo th_data
 
 	/*llama la funci�n adquirir desde donde se lanzan el productor y se
 	 * setea el callback*/
@@ -1997,7 +1997,7 @@ int main()
 	/*--------------------------*/
 
 	while (!kbhit() || getch() != 's')
-		sleep(2);
+		Sleep(2);
 
 	salir = true;
 
