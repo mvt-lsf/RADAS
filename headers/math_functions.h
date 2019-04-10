@@ -1,0 +1,2 @@
+float *moving1avg_full(float *vector, unsigned int vector_size, unsigned int window, float *vector_avg);
+float *moving1avg(float *vector, unsigned int vector_size, unsigned int window, float *vector_avg, unsigned int vector_avg_size);

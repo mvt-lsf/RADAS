@@ -103,6 +103,9 @@ CppProperties.json
 # Rope project settings
 .ropeproject
 
+# Vs code files
+.vscode/
+
 # mkdocs documentation
 /site
 
