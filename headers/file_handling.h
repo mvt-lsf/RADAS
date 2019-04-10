@@ -5,7 +5,7 @@
 
 #ifndef STRUCTS
 #define STRUCTS
-#include <structs.h>
+#include "structs.h"
 #endif
 
 int write_config();

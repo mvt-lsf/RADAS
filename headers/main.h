@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #ifndef BOOLS
 #define BOOLS
 #include <stdbool.h>
@@ -7,21 +5,25 @@
 
 #ifndef STRUCTS
 #define STRUCTS
-#include <structs.h>
+#include "structs.h"
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <file_handling.h>
+
 #include <windows.h>
 #include <process.h>
 #include <conio.h>
-#include <math_functions.h>
 #include <math.h>
 #include <memory.h>
+
+
 #include <WD-dask64.h>
 #include <fftw3.h>
 
+#include "math_functions.h"
+#include "file_handling.h"
 
 
 struct th_Data parse_config(FILE *file);
