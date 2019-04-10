@@ -90,6 +90,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Vscode project settings
+.Vscode
+.vscode
+.vs
+CppProperties.json
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -102,3 +108,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+RADAS/RADAS.cbp
