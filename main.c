@@ -1788,10 +1788,6 @@ procesa_FFT(void *n) // acepta solamente un th_Data, se podria mover de lugar
 		}
 
 		fftwf_execute(p2);
-
-		// printf("FFT: %f, %f, %f
-		// \n",out[2000*10+1][0],out[2000*10+2][0],out[2000*10+3][0]);
-
 		/// Calcula el valor absoluto, se podria pasar a su propia
 		/// funcion
 		for (i = 0; i < ((nShotsChk / 2) + 1) * bins; ++i) {
