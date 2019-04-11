@@ -108,7 +108,7 @@ void parse_th_config(struct th_Data *data, char *line, char *target){
 		data->window_time_osc = atoi(target);
 }
 
-void copy_file(char *source, char dest){
+void copy_file(char *source, char *dest){
 	FILE *src_fd;
 	FILE *dst_fd;
 	src_fd = fopen(source,"r");
