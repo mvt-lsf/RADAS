@@ -1846,15 +1846,11 @@ int main()
 	/// CARGO PARAMETROS DE ADQUISICION ARCHIVO config.ini
 	FILE *file_config =
 		fopen("config.ini", "r"); /* should check the result */
-	char line[200];
+	
 	char line_pozos[200];
 
-	const char *P1_s = "'";
-	const char *P2_s = "'";
-	const char *P1_i = "[";
-	const char *P2_i = "]";
-
-	char *target = NULL;
+	char *line;
+	char *target;
 	char *start, *end;
 
 	struct th_Data datos_thread;
@@ -1868,27 +1864,7 @@ int main()
 
 	datos_thread.infinite_daq = true;
 
-	while (fgets(line, sizeof(line), file_config)) {
-		printf("%s", line);
-
-		/// Busco string
-		if (start = strstr(line, P1_s)) {
-			start += strlen(P1_s);
-			if (end = strstr(start, P2_s)) {
-				target = (char *)malloc(end - start + 1);
-				memcpy(target, start, end - start);
-				target[end - start] = '\0';
-			}
-		}
-
-		if (start = strstr(line, P1_i)) {
-			start += strlen(P1_i);
-			if (end = strstr(start, P2_i)) {
-				target = (char *)malloc(end - start + 1);
-				memcpy(target, start, end - start);
-				target[end - start] = '\0';
-			}
-		}
+	while (fscanf(file_config,"%200s %200s",line, target) != EOF) {
 
 		parse_th_config(&datos_thread, line, target);
 
