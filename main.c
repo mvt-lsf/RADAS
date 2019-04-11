@@ -1842,60 +1842,8 @@ procesa_FFT(void *n) // acepta solamente un th_Data, se podria mover de lugar
 
 int main()
 {
-
-	/// CARGO PARAMETROS DE ADQUISICION ARCHIVO config.ini
-	FILE *file_config =
-		fopen("config.ini", "r"); /* should check the result */
-	
-	char line_pozos[200];
-
-	char *line;
-	char *target;
-	//char *start, *end;
 	struct program_config config;
-	config.th_data = malloc(sizeof(struct th_Data));
-	config.calcula_fft = false;
-	config.calcula_osc = false;
-	config.nro_pozos = 0;
-	config.chunksPorPozo;
-	config.nSubChk;
-	config.window_time_osc;
-	config.cant_curvas = 0;
-
-	config.th_data->infinite_daq = true;
-
-	line = malloc(sizeof(char) * 200);
-	target = malloc(sizeof(char) * 200);
-
-	while (fscanf(file_config,"%200s %200s",line, target) != EOF) {
-
-		parse_th_config(config.th_data, line, target);
-
-		if (strstr(line, "NSubChk:")) {
-			config.nSubChk = atoi(target);
-		}
-		for (int i = 0; i < config.nro_pozos; i++) {
-			snprintf(line_pozos, sizeof(line_pozos),
-				 "Pozo%d:", i + 1);
-			if (strstr(line, line_pozos)) {
-				config.th_data->name_pozos[i] = target;
-			}
-		}
-
-		if (strstr(line, "CalculaFFT:")) {
-			if (strstr(target, "si")) {
-				config.calcula_fft = true;
-			}
-		}
-
-		if (strstr(line, "CalculaOSC:")) {
-			if (strstr(target, "si")) {
-				config.calcula_osc = true;
-			}
-		}
-		target = NULL;
-	}
-	fclose(file_config);
+	read_config("config.ini", &config);
 
 	if (config.th_data->nShots > 0) {
 		config.th_data->infinite_daq = false;

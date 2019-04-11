@@ -13,8 +13,13 @@
 #include <stdlib.h>
 #endif
 
+#ifndef STDIO_H
+#define STDIO_H
+#include <stdio.h>
+#endif
+
 #include <string.h>
 
 int write_config();
-struct th_Data read_config();
+void read_config(char *filename, struct program_config *config);
 void parse_th_config(struct th_Data *data, char *line, char *target);
