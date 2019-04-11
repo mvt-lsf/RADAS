@@ -1,10 +1,9 @@
 #include <file_handling.h>
 
-void read_config(char *filename, struct program_config *config){
-		/// CARGO PARAMETROS DE ADQUISICION ARCHIVO config.ini
-	FILE *file_config =
-		fopen(filename, "r"); /* should check the result */
-	
+void read_config(char *filename, struct program_config *config) {
+	/// CARGO PARAMETROS DE ADQUISICION ARCHIVO config.ini
+	FILE *file_config = fopen(filename, "r"); /* should check the result */
+
 	char line_pozos[200];
 	config->th_data = malloc(sizeof(struct th_Data));
 	config->calcula_fft = false;
@@ -20,32 +19,26 @@ void read_config(char *filename, struct program_config *config){
 	char *line = malloc(sizeof(char) * 200);
 	char *target = malloc(sizeof(char) * 200);
 
-	while (fscanf(file_config,"%200s %200s",line, target) != EOF) {
+	while (fscanf(file_config, "%200s %200s", line, target) != EOF) {
 
 		parse_th_config(config->th_data, line, target);
 
-		if (strstr(line, "NSubChk:")) {
+		if (strstr(line, "NSubChk:"))
 			config->nSubChk = atoi(target);
-		}
+
 		for (int i = 0; i < config->nro_pozos; i++) {
 			snprintf(line_pozos, sizeof(line_pozos),
 				 "Pozo%d:", i + 1);
-			if (strstr(line, line_pozos)) {
+			if (strstr(line, line_pozos))
 				config->th_data->name_pozos[i] = target;
-			}
 		}
 
-		if (strstr(line, "CalculaFFT:")) {
-			if (strstr(target, "si")) {
+		if (strstr(line, "CalculaFFT:"))
+			if (strstr(target, "si"))
 				config->calcula_fft = true;
-			}
-		}
-
-		if (strstr(line, "CalculaOSC:")) {
-			if (strstr(target, "si")) {
+		if (strstr(line, "CalculaOSC:"))
+			if (strstr(target, "si"))
 				config->calcula_osc = true;
-			}
-		}
 		target = NULL;
 	}
 	fclose(file_config);
