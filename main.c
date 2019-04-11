@@ -1710,8 +1710,7 @@ void *procesa_Monitoreo(void *n) // Se encarga de manejar la memoria, procesar y
 	return NULL;
 }
 
-void *
-procesa_FFT(void *n) // acepta solamente un th_Data, se podria mover de lugar
+void * procesa_FFT(void *n) // acepta solamente un th_Data, se podria mover de lugar
 {
 	struct th_Data *data = (struct th_Data *)n;
 	int nCh = data->nCh;
@@ -1724,8 +1723,7 @@ procesa_FFT(void *n) // acepta solamente un th_Data, se podria mover de lugar
 	// Buffer float para fft
 	int n_t = 8;
 	fftwf_init_threads();
-	fftwf_plan_with_nthreads(
-		n_t); /// COMPARAR CONTRA THREADS NORMALES, MKL, IPP, IPP_short
+	fftwf_plan_with_nthreads(n_t);
 
 	/// Reservo memoria para salida y entrada del plan
 	float *dst_float = malloc(sizeof(float) * bins * nShotsChk);
@@ -1860,17 +1858,9 @@ int main()
 
 	/// Copio archivo de configuraci�n en la carpeta de salida
 	char config_file_dir[100];
-	char fname_config;
-	FILE *source, *dest;
 	strcpy(config_file_dir, fname_dir);
 	strcat(config_file_dir, "/config.ini");
-	source = fopen("config.ini", "r");
-	dest = fopen(config_file_dir, "w");
-	while ((fname_config = fgetc(source)) != EOF)
-		fputc(fname_config, dest);
-
-	fclose(source);
-	fclose(dest);
+	copy_file("config.ini", config_file_dir);
 
 	/// Window time de monitoreo
 	config.th_data->window_mon_time = config.th_data->window_time; // Th_Data

@@ -107,3 +107,17 @@ void parse_th_config(struct th_Data *data, char *line, char *target){
 	if (strstr(line, "WindowTimeOsc:"))
 		data->window_time_osc = atoi(target);
 }
+
+void copy_file(char *source, char dest){
+	FILE *src_fd;
+	FILE *dst_fd;
+	src_fd = fopen(source,"r");
+	dst_fd = fopen(dest, "w");
+	char chr = fgetc(src_fd);
+	while (chr != EOF){
+		fputc(chr, dst_fd);
+		chr = fgetc(src_fd);
+	}
+	fclose(src_fd);
+	fclose(dst_fd);
+}

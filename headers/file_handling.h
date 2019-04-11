@@ -23,3 +23,4 @@
 int write_config();
 void read_config(char *filename, struct program_config *config);
 void parse_th_config(struct th_Data *data, char *line, char *target);
+void copy_file(char *source, char dest);

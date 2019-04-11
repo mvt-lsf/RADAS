@@ -34,7 +34,6 @@
 #include "file_handling.h"
 
 
-struct th_Data parse_config(FILE *file);
 double GetCounter();
 void StartCounter();
 void *procesa_FFT_banda(void *n);
