@@ -1852,56 +1852,56 @@ int main()
 	char *line;
 	char *target;
 	//char *start, *end;
+	struct program_config config;
+	config.th_data = malloc(sizeof(struct th_Data));
+	config.calcula_fft = false;
+	config.calcula_osc = false;
+	config.nro_pozos = 0;
+	config.chunksPorPozo;
+	config.nSubChk;
+	config.window_time_osc;
+	config.cant_curvas = 0;
 
-	struct th_Data datos_thread;
-	bool calcula_fft = false;
-	bool calcula_osc = false;
-	int nro_pozos = 0;
-	int chunksPorPozo;
-	short nSubChk;
-	int window_time_osc;
-	int cant_curvas = 0;
-
-	datos_thread.infinite_daq = true;
+	config.th_data->infinite_daq = true;
 
 	line = malloc(sizeof(char) * 200);
 	target = malloc(sizeof(char) * 200);
 
 	while (fscanf(file_config,"%200s %200s",line, target) != EOF) {
 
-		parse_th_config(&datos_thread, line, target);
+		parse_th_config(config.th_data, line, target);
 
 		if (strstr(line, "NSubChk:")) {
-			nSubChk = atoi(target);
+			config.nSubChk = atoi(target);
 		}
-		for (int i = 0; i < nro_pozos; i++) {
+		for (int i = 0; i < config.nro_pozos; i++) {
 			snprintf(line_pozos, sizeof(line_pozos),
 				 "Pozo%d:", i + 1);
 			if (strstr(line, line_pozos)) {
-				datos_thread.name_pozos[i] = target;
+				config.th_data->name_pozos[i] = target;
 			}
 		}
 
 		if (strstr(line, "CalculaFFT:")) {
 			if (strstr(target, "si")) {
-				calcula_fft = true;
+				config.calcula_fft = true;
 			}
 		}
 
 		if (strstr(line, "CalculaOSC:")) {
 			if (strstr(target, "si")) {
-				calcula_osc = true;
+				config.calcula_osc = true;
 			}
 		}
 		target = NULL;
 	}
 	fclose(file_config);
 
-	if (datos_thread.nShots > 0) {
-		datos_thread.infinite_daq = false;
+	if (config.th_data->nShots > 0) {
+		config.th_data->infinite_daq = false;
 	}
 	/// FIN DE LA CARGA
-	if (datos_thread.nShotsChk % nSubChk != 0) {
+	if (config.th_data->nShotsChk % config.nSubChk != 0) {
 		printf("Error: NShotsChk/NSubChk debe ser un numero entero");
 		salir = true;
 	}
@@ -1929,11 +1929,11 @@ int main()
 	fclose(dest);
 
 	/// Window time de monitoreo
-	datos_thread.window_mon_time = datos_thread.window_time; // Th_Data
+	config.th_data->window_mon_time = config.th_data->window_time; // Th_Data
 
 	/// Aloca memoria del buffer
-	chkBuffer = malloc((long long)datos_thread.bins * datos_thread.nShotsChk
-			   * datos_thread.nCh * CHUNKS * sizeof(short));
+	chkBuffer = malloc((long long)config.th_data->bins * config.th_data->nShotsChk
+			   * config.th_data->nCh * CHUNKS * sizeof(short));
 	// long tamanio=5L*1024L*1024L*1024L;procesa_FFT
 	printf("Puntero chunks reservado: %p.\n", chkBuffer);
 
@@ -1946,31 +1946,31 @@ int main()
 
 	/*llama la funci�n adquirir desde donde se lanzan el productor y se
 	 * setea el callback*/
-	adquirir(datos_thread.nCh, datos_thread.qFreq, 1, 1, datos_thread.bins,
-		 datos_thread.nShotsChk, nSubChk, datos_thread.delay);
+	adquirir(config.th_data->nCh, config.th_data->qFreq, 1, 1, config.th_data->bins,
+		 config.th_data->nShotsChk, config.nSubChk, config.th_data->delay);
 	/*lanza el proceso procesaDTS_01 (el consumidor)*/
 	DWORD rawID, stdID, monID, fftID, oscID;
 	_beginthreadex(NULL, 0,
 		       (unsigned int(__stdcall *)(void *))raw_data_writer,
-		       (void *)&datos_thread, 0, (unsigned int *)&rawID);
+		       (void *)config.th_data, 0, (unsigned int *)&rawID);
 	_beginthreadex(NULL, 0, (unsigned int(__stdcall *)(void *))procesa_STD,
-		       (void *)&datos_thread, 0, (unsigned int *)&stdID);
-	if (datos_thread.nCh > 1) {
+		       (void *)config.th_data, 0, (unsigned int *)&stdID);
+	if (config.th_data->nCh > 1) {
 		_beginthreadex(
 			NULL, 0,
 			(unsigned int(__stdcall *)(void *))procesa_Monitoreo,
-			(void *)&datos_thread, 0, (unsigned int *)&monID);
+			(void *)config.th_data, 0, (unsigned int *)&monID);
 	}
-	if (calcula_fft) {
+	if (config.calcula_fft) {
 		_beginthreadex(
 			NULL, 0,
 			(unsigned int(__stdcall *)(void *))procesa_FFT_banda,
-			(void *)&datos_thread, 0, (unsigned int *)&fftID);
+			(void *)config.th_data, 0, (unsigned int *)&fftID);
 	}
-	if (calcula_osc) {
+	if (config.calcula_osc) {
 		_beginthreadex(
 			NULL, 0, (unsigned int(__stdcall *)(void *))procesa_osc,
-			(void *)&datos_thread, 0, (unsigned int *)&oscID);
+			(void *)config.th_data, 0, (unsigned int *)&oscID);
 	}
 
 	/*--------------------------*/
@@ -1984,22 +1984,22 @@ int main()
 		Sleep(1);
 	while (salir_std == 0)
 		Sleep(1);
-	if (datos_thread.nCh > 1) {
+	if (config.th_data->nCh > 1) {
 		while (salir_monitoreo == 0)
 			Sleep(1);
 	}
-	if (calcula_fft) {
+	if (config.calcula_fft) {
 		while (salir_fft == 0)
 			Sleep(1);
 	}
-	if (calcula_osc) {
+	if (config.calcula_osc) {
 		while (salir_osc == 0)
 			Sleep(1);
 	}
 
 	CloseHandle(rawID);
 	CloseHandle(stdID);
-	if (datos_thread.nCh > 1) {
+	if (config.th_data->nCh > 1) {
 		CloseHandle(monID);
 	}
 	CloseHandle(fftID);

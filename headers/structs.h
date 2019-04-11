@@ -51,6 +51,13 @@ struct th_Data {
 	float cEDFA;
 };
 
-struct config{
+struct program_config{
 	struct th_Data *th_data;
+	bool calcula_fft;
+	bool calcula_osc;
+	int nro_pozos;
+	int chunksPorPozo;
+	short nSubChk;
+	int window_time_osc;
+	int cant_curvas;
 };
