@@ -1851,7 +1851,7 @@ int main()
 
 	char *line;
 	char *target;
-	char *start, *end;
+	//char *start, *end;
 
 	struct th_Data datos_thread;
 	bool calcula_fft = false;
@@ -1863,6 +1863,9 @@ int main()
 	int cant_curvas = 0;
 
 	datos_thread.infinite_daq = true;
+
+	line = malloc(sizeof(char) * 200);
+	target = malloc(sizeof(char) * 200);
 
 	while (fscanf(file_config,"%200s %200s",line, target) != EOF) {
 
