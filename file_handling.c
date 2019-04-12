@@ -121,3 +121,27 @@ void copy_file(char *source, char *dest){
 	fclose(src_fd);
 	fclose(dst_fd);
 }
+
+void write_raw_hdr(char *filename, struct th_Data *data, int channel){
+		FILE *out_fd = fopen(filename, "ab");
+		fprintf(out_fd, "Placa: '%s' \n", data->placa);
+		fprintf(out_fd, "Dato: '%s' \n", "RAW DATA");
+		fprintf(out_fd, "DataType: '%s' \n", "short");
+		fprintf(out_fd, "PythonNpDataType: '%s' \n",
+			"np.int16");
+		fprintf(out_fd, "BytesPerDatum: [%d] \n", 2);
+		fprintf(out_fd, "Bins: [%d] \n", data->bins);
+		fprintf(out_fd, "Delay: [%d] \n", data->delay);
+		fprintf(out_fd, "Bins_raw: [%d] \n", data->bins_raw);
+		fprintf(out_fd, "Delay_raw: [%d] \n", data->delay_raw);
+		fprintf(out_fd, "Cols: [%d] \n", data->bins_raw);
+		fprintf(out_fd, "NumberOfChannels: [%d] \n", data->nCh);
+		fprintf(out_fd, "NDatum: [%d] \n", 1);
+		if (channel == -1)
+			fprintf(out_fd, "Channel: [%d] \n", channel);
+		fprintf(out_fd, "FreqRatio: [%d] \n", data->qFreq);
+		fprintf(out_fd, "nShotsChk: [%d] \n", data->nShotsChk);
+		fprintf(out_fd, "nShots: [%d] \n", data->nShots);
+		fprintf(out_fd, "Fin header \n");
+		fclose(out_fd);
+}

@@ -91,8 +91,8 @@ void *procesa_FFT_banda(void *n)
 	// Buffer float para fft
 	int n_t = 8;
 	fftwf_init_threads();
-	fftwf_plan_with_nthreads(
-		n_t); /// COMPARAR CONTRA THREADS NORMALES, MKL, IPP, IPP_short
+	fftwf_plan_with_nthreads(n_t);
+	/// COMPARAR CONTRA THREADS NORMALES, MKL, IPP, IPP_short
 
 	/// Reservo memoria para salida y entrada del plan
 	float *dst_float = malloc(sizeof(float) * bins * nShotsChk);
@@ -176,7 +176,8 @@ void *procesa_FFT_banda(void *n)
 		}
 
 		fftwf_execute(p2);
-
+		// nShotsChk/2+1 se podria mover fuera del loop
+		// asi ahorrariamos 8 instrucciones por loop
 		/// Valor 0 de la fft
 		for (i = 0; i < bins; ++i) {
 			fft_0[i] = sqrt(
@@ -201,6 +202,7 @@ void *procesa_FFT_banda(void *n)
 			out_abs_acc[i] += out_abs[i];
 		}
 
+		//out_abs deberia bastar para pasar el pointer
 		WriteFile(paip, &out_abs[0],
 			  sizeof(float) * bins * (1 + (nShotsChk / 2)),
 			  &leido_paip, NULL);
@@ -210,8 +212,8 @@ void *procesa_FFT_banda(void *n)
 			chunk_actual = chkBuffer;
 			chunk_control = 0;
 		} else {
-			chunk_actual +=
-				bins * nShotsChk * nCh; // avanzo 2 channels
+			chunk_actual += bins * nShotsChk * nCh;
+			// avanzo 2 channels
 		}
 	}
 
@@ -541,27 +543,7 @@ void *raw_data_writer(void *n)
 		mkdir(dire_ch0);
 		strcpy(dire_ch0_hdr, dire_ch0);
 		strcat(dire_ch0_hdr, "/ch0.hdr");
-
-		FILE *f_raw_data_out_ch0_h = fopen(dire_ch0_hdr, "ab");
-		fprintf(f_raw_data_out_ch0_h, "Placa: '%s' \n", placa);
-		fprintf(f_raw_data_out_ch0_h, "Dato: '%s' \n", "RAW DATA");
-		fprintf(f_raw_data_out_ch0_h, "DataType: '%s' \n", "short");
-		fprintf(f_raw_data_out_ch0_h, "PythonNpDataType: '%s' \n",
-			"np.int16");
-		fprintf(f_raw_data_out_ch0_h, "BytesPerDatum: [%d] \n", 2);
-		fprintf(f_raw_data_out_ch0_h, "Bins: [%d] \n", bins);
-		fprintf(f_raw_data_out_ch0_h, "Delay: [%d] \n", delay);
-		fprintf(f_raw_data_out_ch0_h, "Bins_raw: [%d] \n", bins_raw);
-		fprintf(f_raw_data_out_ch0_h, "Delay_raw: [%d] \n", delay_raw);
-		fprintf(f_raw_data_out_ch0_h, "Cols: [%d] \n", bins_raw);
-		fprintf(f_raw_data_out_ch0_h, "NumberOfChannels: [%d] \n", nCh);
-		fprintf(f_raw_data_out_ch0_h, "NDatum: [%d] \n", 1);
-		fprintf(f_raw_data_out_ch0_h, "Channel: [%d] \n", 0);
-		fprintf(f_raw_data_out_ch0_h, "FreqRatio: [%d] \n", qFreq);
-		fprintf(f_raw_data_out_ch0_h, "nShotsChk: [%d] \n", nShotsChk);
-		fprintf(f_raw_data_out_ch0_h, "nShots: [%d] \n", nShots);
-		fprintf(f_raw_data_out_ch0_h, "Fin header \n");
-		fclose(f_raw_data_out_ch0_h);
+		write_raw_hdr(dire_ch0_hdr, data, 0);
 	}
 
 	char dire_ch1[70];
@@ -573,27 +555,7 @@ void *raw_data_writer(void *n)
 		mkdir(dire_ch1);
 		strcpy(dire_ch1_hdr, dire_ch1);
 		strcat(dire_ch1_hdr, "/ch1.hdr");
-
-		FILE *f_raw_data_out_ch1_h = fopen(dire_ch1_hdr, "ab");
-		fprintf(f_raw_data_out_ch1_h, "Placa: '%s' \n", placa);
-		fprintf(f_raw_data_out_ch1_h, "Dato: '%s' \n", "RAW DATA");
-		fprintf(f_raw_data_out_ch1_h, "DataType: '%s' \n", "short");
-		fprintf(f_raw_data_out_ch1_h, "PythonNpDataType: '%s' \n",
-			"np.int16");
-		fprintf(f_raw_data_out_ch1_h, "BytesPerDatum: [%d] \n", 2);
-		fprintf(f_raw_data_out_ch1_h, "Bins: [%d] \n", bins);
-		fprintf(f_raw_data_out_ch1_h, "Delay: [%d] \n", delay);
-		fprintf(f_raw_data_out_ch1_h, "Bins_raw: [%d] \n", bins_raw);
-		fprintf(f_raw_data_out_ch1_h, "Delay_raw: [%d] \n", delay_raw);
-		fprintf(f_raw_data_out_ch1_h, "Cols: [%d] \n", bins_raw);
-		fprintf(f_raw_data_out_ch1_h, "NumberOfChannels: [%d] \n", nCh);
-		fprintf(f_raw_data_out_ch1_h, "NDatum: [%d] \n", 1);
-		fprintf(f_raw_data_out_ch1_h, "Channel: [%d] \n", 1);
-		fprintf(f_raw_data_out_ch1_h, "FreqRatio: [%d] \n", qFreq);
-		fprintf(f_raw_data_out_ch1_h, "nShotsChk: [%d] \n", nShotsChk);
-		fprintf(f_raw_data_out_ch1_h, "nShots: [%d] \n", nShots);
-		fprintf(f_raw_data_out_ch1_h, "Fin header \n");
-		fclose(f_raw_data_out_ch1_h);
+		write_raw_hdr(dire_ch1_hdr, data, 1);
 	}
 
 	char dire_ch[70];
@@ -605,26 +567,7 @@ void *raw_data_writer(void *n)
 		mkdir(dire_ch);
 		strcpy(dire_ch_hdr, dire_ch);
 		strcat(dire_ch_hdr, "/ch.hdr");
-
-		FILE *f_raw_data_out_h = fopen(dire_ch_hdr, "ab");
-		fprintf(f_raw_data_out_h, "Placa: '%s' \n", placa);
-		fprintf(f_raw_data_out_h, "Dato: '%s' \n", "RAW DATA");
-		fprintf(f_raw_data_out_h, "DataType: '%s' \n", "short");
-		fprintf(f_raw_data_out_h, "PythonNpDataType: '%s' \n",
-			"np.int16");
-		fprintf(f_raw_data_out_h, "BytesPerDatum: [%d] \n", 2);
-		fprintf(f_raw_data_out_h, "Bins: [%d] \n", bins);
-		fprintf(f_raw_data_out_h, "Delay: [%d] \n", delay);
-		fprintf(f_raw_data_out_h, "Bins_raw: [%d] \n", bins_raw);
-		fprintf(f_raw_data_out_h, "Delay_raw: [%d] \n", delay_raw);
-		fprintf(f_raw_data_out_h, "Cols: [%d] \n", bins_raw);
-		fprintf(f_raw_data_out_h, "NumberOfChannels: [%d] \n", nCh);
-		fprintf(f_raw_data_out_h, "NDatum: [%d] \n", nCh);
-		fprintf(f_raw_data_out_h, "FreqRatio: [%d] \n", qFreq);
-		fprintf(f_raw_data_out_h, "nShotsChk: [%d] \n", nShotsChk);
-		fprintf(f_raw_data_out_h, "nShots: [%d] \n", nShots);
-		fprintf(f_raw_data_out_h, "Fin header \n");
-		fclose(f_raw_data_out_h);
+		write_raw_hdr(dire_ch0_hdr, data, -1);
 	}
 
 	char dire_time[70];
@@ -1329,10 +1272,10 @@ void *procesa_STD(void *n) // Sucede lo mismo que con procesa_monitoreo
 	return NULL;
 }
 
-void *procesa_Monitoreo(void *n) // Se encarga de manejar la memoria, procesar y
-				 // guardar la configuracion ademas de escribir
-				 // los datos... esta va a la guillotina
-{
+// Se encarga de manejar la memoria, procesar y
+// guardar la configuracion ademas de escribir
+// los datos... esta va a la guillotina
+void *procesa_Monitoreo(void *n){
 	struct th_Data *data = (struct th_Data *)n;
 	int bins = data->bins;
 	int delay = data->delay;
