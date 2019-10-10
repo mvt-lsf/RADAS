@@ -1,5 +1,5 @@
-/// Ch0: seÒal APD
-/// Ch1: seÒal monitoreo. Laser+EDFA equipo DAS OLEO 1
+/// Ch0: se√±al APD
+/// Ch1: se√±al monitoreo. Laser+EDFA equipo DAS OLEO 1
 
 
 /// (2.8.2) Cambios respecto a version 2.8.1:
@@ -36,21 +36,21 @@
 /// -MON_LASER: monitoreo de la estabilidad del laser
 /// -MON_EDFA: monitoreo de la estabilidad del pulso amplificado por el edfa
 /// -TIME: tiempo de guardado de cada chunk en el HD
-/// Agrego el par·metro Delay al header (me lo habia olvidado)
+/// Agrego el par√°metro Delay al header (me lo habia olvidado)
 ///
 /// (3.0) Cambios respecto a version 2.9.7:
-/// 17/08/2017: Se castea el chkBuffer como long long. En las versiones anteriores se verificaba error cuando el chkBuffer superaba el tamaÒo de un long (4 bytes). Ahora el chkBuffer puede superar ese valor.
-/// 17/08/2017: Se verifica error de la placa cuando el tamaÒo del buffer de la placa supera los 128MS. NO RESUELTO.
+/// 17/08/2017: Se castea el chkBuffer como long long. En las versiones anteriores se verificaba error cuando el chkBuffer superaba el tama√±o de un long (4 bytes). Ahora el chkBuffer puede superar ese valor.
+/// 17/08/2017: Se verifica error de la placa cuando el tama√±o del buffer de la placa supera los 128MS. NO RESUELTO.
 ///
 /// (3.1) Cambios respecto a version 3.0:
-/// 26/08/2017: Se agrega otro parametro a la adquisiciÛn nSubChunk para resolver las limitaciones en el tamaÒo del buffer de la placa (ver ultimo punto de la version anterior). Este par·metro es un numero entero
-///             que divide el chunk de nShotsChk en particiones pequeÒas de tamaÒo nShotsChk/nSubChunk. Cada chunk ahora esta formado de nSubChunk pedazos. El semaforo se activa cuando se llena todo un chunk (es decir todos los nSubChunk).
-///             Se modifican el callback y la funciÛn adquirir, que recibe un nueva variable de entrada (nSubChunk).
+/// 26/08/2017: Se agrega otro parametro a la adquisici√≥n nSubChunk para resolver las limitaciones en el tama√±o del buffer de la placa (ver ultimo punto de la version anterior). Este par√°metro es un numero entero
+///             que divide el chunk de nShotsChk en particiones peque√±as de tama√±o nShotsChk/nSubChunk. Cada chunk ahora esta formado de nSubChunk pedazos. El semaforo se activa cuando se llena todo un chunk (es decir todos los nSubChunk).
+///             Se modifican el callback y la funci√≥n adquirir, que recibe un nueva variable de entrada (nSubChunk).
 ///
 /// (3.2) Cambios respecto a version 3.1:
-/// 27/08/2017: Se agrega la posibilidad de guardar dato crudo en un rango de bines. Para esto se agregan dos nuevos par·metros.
+/// 27/08/2017: Se agrega la posibilidad de guardar dato crudo en un rango de bines. Para esto se agregan dos nuevos par√°metros.
 ///             - Bins_raw: bins que se escriben de dato crudo
-///             - Delay_raw: delay para el dato crudo. El Delay_raw es respecto de la adquisiciÛn. Es decir el delay total de la escritura del dato crudo es Delay + Delay_raw
+///             - Delay_raw: delay para el dato crudo. El Delay_raw es respecto de la adquisici√≥n. Es decir el delay total de la escritura del dato crudo es Delay + Delay_raw
 ///
 /// (4.0) Cambios respecto a version 3.2:
 /// 29/09/2017: Rehace la cuenta para calcular la STD de manera mas eficiente, la calcula a medida que recorre el chunk en orden. De esta manera el proceso STD no se atrasa cuando se adquiere gran cantidad de bins
@@ -67,7 +67,7 @@
 #include "WD-dask64.h"
 #include "fftw3.h"
 
-// renombra algunos par·metros de la placa para usarlos en las funciones. los de la derecha significan algo para la placa
+// renombra algunos par√°metros de la placa para usarlos en las funciones. los de la derecha significan algo para la placa
 
 #define TIMEBASE      WD_IntTimeBase
 #define ADTRIGSRC     WD_AI_TRGSRC_ExtD
@@ -109,7 +109,7 @@ double GetCounter()
 
 }
 
-// en la estructura callback estamos juntamos todas las variables externas que utiliza la funciÚn AI_CallBack
+// en la estructura callback estamos juntamos todas las variables externas que utiliza la funci√≤n AI_CallBack
 short* chkBuffer;
 SYSTEMTIME* tssBuffer;//CAMBIO TIMESTAMP
 
@@ -142,10 +142,10 @@ struct {
     //HANDLE cambio_pozo; // defini un envento para avisar que se debe cambiar de pozo
     HANDLE semConsumidor[CONSUMIDORES];
 }callback;
-/* se definen como globales los tipos de datos que utilizan los procesos. Los porcesos no admiten ning˙n tipo de argumento
- porque es un creador de una funciÛn, tiene que ser capaz de poder ejecutar culaquier cosa. Lo que se hace es pasarle un puntero a void y en esa direcciÛn se
- cargan todos los par·metros que necesita el proceso. La ˙nica alternativa es tener todas las variables del proceso como globales. Una vez definido el tipo
- cuando se lanza el proceso se crea un estructura particular del tipo correspondiente y se le pasa la direcciÛn de memoria al proceso. dentro del proceso
+/* se definen como globales los tipos de datos que utilizan los procesos. Los porcesos no admiten ning√∫n tipo de argumento
+ porque es un creador de una funci√≥n, tiene que ser capaz de poder ejecutar culaquier cosa. Lo que se hace es pasarle un puntero a void y en esa direcci√≥n se
+ cargan todos los par√°metros que necesita el proceso. La √∫nica alternativa es tener todas las variables del proceso como globales. Una vez definido el tipo
+ cuando se lanza el proceso se crea un estructura particular del tipo correspondiente y se le pasa la direcci√≥n de memoria al proceso. dentro del proceso
  se accede a las variables*/
 
 typedef struct th_Data{
@@ -242,7 +242,7 @@ void *procesa_FFT_banda(void* n){
     int nShotsChk=(*(th_Data *)n).nShotsChk;
     int chunk_fft_salteo=(*(th_Data *)n).chunk_fft_salteo;
     int chunk_fft_promedio=(*(th_Data *)n).chunk_fft_promedio;
-    int window_bin_std=(*(th_Data *)n).window_bin_std;
+    //int window_bin_std=(*(th_Data *)n).window_bin_std;
     int window_bin_mean=(*(th_Data *)n).window_bin_mean;
     int bin_mon_edfa_i=(*(th_Data *)n).bin_mon_edfa_i;
     int bin_mon_edfa_f=(*(th_Data *)n).bin_mon_edfa_f;
@@ -331,7 +331,7 @@ void *procesa_FFT_banda(void* n){
     int delta_bin_edfa = bin_mon_edfa_f-bin_mon_edfa_i;
     int off_e_edfa = 0;
 
-    while(salir == 0){ ///wait podrÌa estar aca
+    while(salir == 0){ ///wait podr√≠a estar aca
 
         WaitForSingleObject(callback.semConsumidor[3], INFINITE);
 
@@ -518,19 +518,19 @@ void AI_CallBack()
 
 
 void adquirir(short nCh, int qFreqAdq, int rangoDinCh1,int rangoDinCh2, int bins, int nShotsChk, int nSubChk, int delay) {
-    /* configura la placa pasando el n˘mero de canales, el entero por el que se divide la freq de adquisiciÚn m‡xima.
+    /* configura la placa pasando el n√πmero de canales, el entero por el que se divide la freq de adquisici√≤n m√†xima.
     qFreqAdq 1, 2,3,.......,2^16
      rangoDin 0,1,2 equivale a +-0.2V +-2V y +-10V
-     Adem·s configura los buffers de la RAM a la que la placa transfire los datos aibuf1 y aibuf2.
+     Adem√°s configura los buffers de la RAM a la que la placa transfire los datos aibuf1 y aibuf2.
      Configura triggres, bufferes de la placa. WD_AI_ContBufferSetup y WD_Buffer_Alloc
-     inicia la adquisiciÚn
+     inicia la adquisici√≤n
     */
 
 
 //variables placa
 	I16 Id,Id2, card;//son requeridas por funciones de la placa para almacenar cosas. son de uso exclusivo de las funciones de la placa
 	U16 card_type=PCIe_9852;
-	U16 card_num=CARDNUM; //arranca en 0, en esta compu habÏa dos placas la 0 y la 1.
+	U16 card_num=CARDNUM; //arranca en 0, en esta compu hab√¨a dos placas la 0 y la 1.
 
 	if ((card=WD_Register_Card (card_type, card_num)) <0 ) {
 		printf("Register_Card error=%d", card);
@@ -543,7 +543,7 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1,int rangoDinCh2, int bins
 	// configura los buffers de la ram donde se transfieren los datos de la placa
 	int puntosChk=nCh*bins*nShotsChk/nSubChk;
 	int tamBuffer =puntosChk*sizeof(I16);
-    short* ai_buf = WD_Buffer_Alloc (card, tamBuffer);//direcciÚn de memoria del buffer de la ram utilizado por la placa para descargar los datos.
+    short* ai_buf = WD_Buffer_Alloc (card, tamBuffer);//direcci√≤n de memoria del buffer de la ram utilizado por la placa para descargar los datos.
    //lo tiene que utilizar el callback que vaya a buscar los datos por lo que tine que ser global. Hay un buffer en la ram por cada buffer en la placa.
    if(!ai_buf)
    {
@@ -580,7 +580,7 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1,int rangoDinCh2, int bins
    }
 
 
-   // seteamos impedancia y rango din‡mico de los canales
+   // seteamos impedancia y rango din√†mico de los canales
    U16 rango1,rango2;
    switch(rangoDinCh1){
    case 0:
@@ -608,7 +608,7 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1,int rangoDinCh2, int bins
     WD_AI_CH_ChangeParam(card,1,AI_RANGE,rango2);
 //----------------------------------------------------
 
-//ver en el manual de la placa esta funciÚn
+//ver en el manual de la placa esta funci√≤n
    err = WD_AI_Config (card, TIMEBASE, 1, WD_AI_ADCONVSRC_TimePacer, 0, BUFAUTORESET);
    if (err!=0) {
        printf("WD_AI_Config error=%d", err);
@@ -618,7 +618,7 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1,int rangoDinCh2, int bins
        exit(1);
    }
    //------------------------------------------
-   //configuraciÚn del trigger
+   //configuraci√≤n del trigger
 
    err = WD_AI_Trig_Config (card, ADTRIGMODE, ADTRIGSRC, ADTRIGPOL, 0, 0.0, 0, 0, delay, 0);
    if (err!=0) {
@@ -635,8 +635,8 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1,int rangoDinCh2, int bins
        exit(1);
    }
 //----------------------------------------------------
-// Configura el callBack. El evento es que se llenÛ el buffer de la placa. TrigEvent harÌa otra cosa seg˙n el manual, pero con este funciona y con que sugiere el manual no
-//el callback es el productor trae los datos del buffer de la ram reservado para la placa a los chunks. Por eso recibe tambiËn los sem‡foros de los consumidores
+// Configura el callBack. El evento es que se llen√≥ el buffer de la placa. TrigEvent har√≠a otra cosa seg√∫n el manual, pero con este funciona y con que sugiere el manual no
+//el callback es el productor trae los datos del buffer de la ram reservado para la placa a los chunks. Por eso recibe tambi√®n los sem√†foros de los consumidores
     callback.bins=bins;
     callback.nCh=nCh;
     callback.nShotsChk=nShotsChk;
@@ -658,7 +658,7 @@ void adquirir(short nCh, int qFreqAdq, int rangoDinCh1,int rangoDinCh2, int bins
 //----------------
 //reserva memoria para  los chunks: short* chkBuffer
 
-    // creamos sem·foros
+    // creamos sem√°foros
     callback.semConsumidor[0]=CreateSemaphore(NULL,0,CHUNKS,NULL);
     callback.semConsumidor[1]=CreateSemaphore(NULL,0,CHUNKS,NULL);
     callback.semConsumidor[2]=CreateSemaphore(NULL,0,CHUNKS,NULL);
@@ -1340,7 +1340,7 @@ void *procesa_STD(void* n){
     unsigned short* ts_pipe=malloc(7*sizeof(unsigned short));
 
 
-    while(salir == 0){ ///wait podrÌa estar aca
+    while(salir == 0){ ///wait podr√≠a estar aca
 
         cnt_ch++;
 
@@ -1365,7 +1365,7 @@ void *procesa_STD(void* n){
 
                 mean_w[(i-bins*(window_time-1))]=mean_w[(i-bins*(window_time))]+((float)(chunk_actual[i*nCh])-(float)(chunk_actual[nCh*(i-bins*(window_time))]))/window_time;
                 mean[i%bins]+=mean_w[(i-bins*(window_time-1))];
-        }/// falta restar la seÒal con el filtro mean_w
+        }/// falta restar la se√±al con el filtro mean_w
     //    printf("AndaFiltroMedia\n");
 
     for(i=0;i<bins;++i){///STD Cambio en 29/09/2017
@@ -1382,7 +1382,7 @@ void *procesa_STD(void* n){
 //        //mean[i]=sqrt(mean[i]/(shots_per_chunk-window-1));
     }
 
-        /// Agrega Marco 18/07/2017 (version 2.8.2). Ahora hace cociente entre la desviaciÛn est·ndar y el promedio con moving average.
+        /// Agrega Marco 18/07/2017 (version 2.8.2). Ahora hace cociente entre la desviaci√≥n est√°ndar y el promedio con moving average.
         moving1avg(perfil, bins ,window_bin_mean, perfil_mv_avg, perfil_mv_avg_size);
 
         /// Cambio 06/02/2018
@@ -1524,7 +1524,7 @@ void *procesa_Monitoreo(void* n){
     float* mean_flt=malloc(bins*sizeof(float)); //falta free
 
 
-        // AGREGA MARCO PARA VER ESTABILIDAD DE LA ENERGÕA DE LOS PULSOS AMPLIFICADOS
+        // AGREGA MARCO PARA VER ESTABILIDAD DE LA ENERG√çA DE LOS PULSOS AMPLIFICADOS
         // 11/01/2017 Histograma
         // Laser
         int delta_bin_laser = bin_mon_laser_f-bin_mon_laser_i;
@@ -1658,7 +1658,7 @@ void *procesa_Monitoreo(void* n){
     char nombre_mon_edfa[70];
     char num_str[10];
 
-    while(salir == 0){ ///wait podrÌa estar aca
+    while(salir == 0){ ///wait podr√≠a estar aca
 
         cnt_ch++;
 
@@ -1682,7 +1682,7 @@ void *procesa_Monitoreo(void* n){
         }
 
 
-      // AGREGA MARCO PARA VER ESTABILIDAD DE LA ENERGÕA DE LOS PULSOS AMPLIFICADOS
+      // AGREGA MARCO PARA VER ESTABILIDAD DE LA ENERG√çA DE LOS PULSOS AMPLIFICADOS
       // Sumo la senal con la regla de los trapecios.
       // Monitoreo LASER
         for(i=0;i<nShotsChk;++i){
@@ -1858,7 +1858,7 @@ void *procesa_FFT(void* n){
     int cnt_salteo = 0;
     int cnt_promedio = 0;
     int chunk_control=0;
-    while(salir == 0){ ///wait podrÌa estar aca
+    while(salir == 0){ ///wait podr√≠a estar aca
 
         WaitForSingleObject(callback.semConsumidor[3], INFINITE);
 
@@ -2152,7 +2152,7 @@ int main()
 	strftime(fname_dir, 50, "%y_%d_%m_%H_%M_%S", timeinfo);
 	mkdir(fname_dir);
 
-	/// Copio archivo de configuraciÛn en la carpeta de salida
+	/// Copio archivo de configuraci√≥n en la carpeta de salida
 	char config_file_dir[100];
 	char fname_config;
 	FILE *source, *dest;
@@ -2219,7 +2219,7 @@ int main()
     DatosThread.cant_curvas = cant_curvas;
     DatosThread.window_time_osc = window_time_osc;
 
-    /*llama la funciÚn adquirir desde donde se lanzan el productor y se setea el callback*/
+    /*llama la funci√≤n adquirir desde donde se lanzan el productor y se setea el callback*/
     adquirir(nCh,qFreq,1,1,bins,nShotsChk,nSubChk,delay);
     /*lanza el proceso procesaDTS_01 (el consumidor)*/
         DWORD rawID, stdID, monID, fftID, oscID;
